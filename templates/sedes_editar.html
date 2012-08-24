@@ -1,0 +1,141 @@
+{% extends "_base.html" %}
+{% block title %}
+	SIGS.:.Editar Sede
+{% endblock %}
+{% block bodycontent %}
+<script type="text/javascript">
+	function invokeSuccessNotification(msg){
+		noty({force: true, timeout: 5000, layout : 'bottomRight', text: msg, type: 'information'});
+	}
+	$(document).ready(function(){
+		$("#fechaInicialRegistro").datepicker();
+
+		$("#selectUsuarioEncargado").change(function(){
+			if($(this).prop("selectedIndex") == 0){
+				window.open('popup_usuario_registrar.html', '_blank', 'scrollbars=1, height=550, width=750');
+			}
+		});
+		
+		$('form[name=formRegistro]').submit(function(){
+			calle = $('input[name=calle]')
+            numeroCalle = $('input[name=numeroCalle]')
+            provincia = $('input[name=provincia]')
+            localidad = $('input[name=localidad]')
+            codigoPostal = $('input[name=codigoPostal]')
+            nombre = $('input[name=nombre]')
+            telefono = $('input[name=telefono]')
+            isPrincipal = $('input[name=chkSedePrincipal]') 
+            descripcion = $('textarea[name=txtDescripcion]')
+            fechaRegistroStr = $('input[name=fechaRegistro]')
+			selectUsuarioEncargado = $('select[name=selectUsuarioEncargado]').val()
+			btnConfirmarEdicion = $('input[name=btnConfirmarEdicion]').val()
+
+			//validacion JS 
+			var array = [
+						 validarCampoTexto($(nombre), 'Ingrese un nombre valido', 'string'),
+						 validarCampoTexto($(descripcion), 'Ingrese una descripcion valida', 'string'),
+						 validarCampoTexto($(fechaRegistroStr), 'Ingrese una fecha valida de creacion','d'),
+						 validarCampoTexto($(calle), 'Ingrese una calle valida', 'string'),
+						 validarCampoTexto($(numeroCalle), 'Ingrese un numero de calle valido', 'number'),
+						 validarCampoTexto($(provincia), 'Ingrese una provincia valida', 'string'),
+						 validarCampoTexto($(localidad), 'Ingrese una localidad valida', 'string')
+			             ]
+            
+			if (!validateArray(array, 'error', 'Verifique los campos invalidos...', false, 'top')){
+				return false;
+			}
+			
+			dataString = 'calle='+$(calle).val()+'&numeroCalle='+$(numeroCalle).val()+'&provincia='+$(provincia).val()+
+						'&localidad='+$(localidad).val()+'&codigoPostal='+$(codigoPostal).val()+'&nombre='+$(nombre).val()+
+						'&telefono='+$(telefono).val()+'&chkSedePrincipal='+$(isPrincipal).val()+'&txtDescripcion='+$(descripcion).val()+
+						'&fechaRegistro='+$(fechaRegistroStr).val()+'&selectUsuarioEncargado='+selectUsuarioEncargado+'&btnConfirmarEdicion='+btnConfirmarEdicion+
+						'&keyIdSede={{ rsSedes.key() }}&keyIdEncargado='+$('#keyIdEncargado').val();
+			$.ajax({
+				type:'POST',
+				url:'/sede',
+				data:dataString,
+				dataType:'json',
+				success:function(responseData){
+					validateElementFromJsonResponse("OK", responseData.nombre, $(nombre));
+					validateElementFromJsonResponse("OK", responseData.descripcion, $(descripcion));
+					validateElementFromJsonResponse("OK", responseData.calle, $(calle));
+					validateElementFromJsonResponse("OK", responseData.numeroCalle, $(numeroCalle));
+					validateElementFromJsonResponse("OK", responseData.provincia, $(provincia));
+					validateElementFromJsonResponse("OK", responseData.localidad, $(localidad));
+					validateElementFromJsonResponse("OK", responseData.fechaRegistro, $(fechaRegistroStr));
+					if (responseData.responseStatus == "OK"){
+						window.location.replace('/sede?opcion=main&msgCode=67&txt='+$(nombre).val());
+					}else{
+						noty({force: true, timeout: false, text: responseData.errorMessage, type: 'error'});
+					}
+				}
+					
+			});
+			return false;
+		});	
+		
+	});
+	
+</script>
+	<div id="pop"  style="display:none;"></div>
+	<h2>Editar Sede</h2>
+	<form  method="post" action="/sede" name='formRegistro' >
+		<table id="one-column-emphasis">
+			<tr><td>Nombre:</td> <td><input type="text" name="nombre" value="{{ rsSedes.nombre }}" /></td></tr>
+			<tr><td>Telefono:</td> <td><input type="text" name="telefono" value="{{ rsSedes.telefono }}" /></td></tr>
+			<tr><td>Descripcion:</td> <td> <textarea name="txtDescripcion" rows = "10" cols="50" >{{rsSedes.descripcion}}</textarea></td></tr>
+			<tr><td>Fecha Creacion:</td><td><input type="text" name="fechaRegistro" id="fechaInicialRegistro" value="{{rsSedes.fechaRegistro.strftime('%d/%m/%Y')}}"/></td></tr>
+			<tr><td>Sede Principal:
+				{% if rsSedes.principal == 'S' %}
+					<input type="checkbox" name="chkSedePrincipal" value="S" checked="checked" >
+				{% else %}
+					<input type="checkbox" name="chkSedePrincipal" value="S" >
+				{% endif %}
+			</td></tr>
+		</table>
+		<fieldset>
+				<legend>Direccion</legend>
+				<table>
+					<tr>
+						<td>Calle: </td><td><input type="text" name="calle" value="{{ rsSedes.direccion.calle }}" /></td>
+					</tr>
+					<tr>
+						<td>Numero: </td><td><input type="text" name="numeroCalle" value="{{ rsSedes.direccion.numeroCalle }}" /></td>
+					</tr>
+					<tr>
+						<td>Provincia: </td><td><input type="text" name="provincia" value="{{ rsSedes.direccion.provincia }}" /></td>
+					</tr>
+					<tr>
+						<td>Localidad: </td><td><input type="text" name="localidad" value="{{ rsSedes.direccion.localidad }}" /></td>
+					</tr>
+					<tr><td>C.P: </td><td><input type="text" name="codigoPostal" value="{{ rsSedes.direccion.codigoPostal }}" /></td></tr>
+				</table>
+		</fieldset>
+		<br>
+		<fieldset>
+			<legend>Usuario Encargado</legend>
+			<select id="selectUsuarioEncargado" name="selectUsuarioEncargado">
+			    <option value="">Registrar nuevo Usuario...</option>
+			    {% for usuario in rsUsuarios %}
+			    	{% if rsEncargado is defined  %}
+				    	{% if usuario.key() == rsEncargado.usuario.key() %}
+					    	<option value="{{ usuario.key() }}" selected="selected">{{ usuario.primerNombre }} {{ usuario.primerApellido }}</option>
+					    {% else %}
+					    	<option value="{{ usuario.key() }}">{{ usuario.primerNombre }} {{ usuario.primerApellido }}</option>
+					    {% endif %}
+				    {% else %}
+				    	<option value="{{ usuario.key() }}">{{ usuario.primerNombre }} {{ usuario.primerApellido }}</option>
+				    {% endif %}
+			    {% endfor %}
+			    <option></option>
+			</select>
+		</fieldset>		
+		<br>
+		{% if rsEncargado is defined  %}
+			<input type="hidden" value="{{ rsEncargado.key() }}" id="keyIdEncargado">
+		{% endif %}
+		<input type="submit" value="Confirmar" class="button-class" style="width: 150px;" name="btnConfirmarEdicion"/>
+		<input type="submit" value="Cancelar" 
+			onclick="window.location='/'; return false;" style="width: 150px;" class="button-class"/>
+	</form>
+{% endblock %}

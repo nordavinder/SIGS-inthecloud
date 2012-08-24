@@ -1,0 +1,134 @@
+{% extends "_base.html" %}
+{% block title %}
+	SIGS.:.Registrar Lugar Prestacion Servicio
+{% endblock %}
+{% block bodycontent %}
+<script type="text/javascript">
+	$(document).ready(function(){
+		//manejo del comportamiento de los radio de arriba
+		$("#selectDireccion").hide();
+		$("#tablaDireccion").hide();
+		$("#txtNombreLugar").attr("readonly",true);
+		$("#txtTelefonoLugar").attr("readonly",true);
+		$("input[type=radio]").click(function(){
+			if($(this).val() == 'S'){
+				$("#selectDireccion").show("slow");
+				$("#tablaDireccion").hide("slow");
+				$("#txtNombreLugar").attr("readonly",true);
+				$("#txtTelefonoLugar").attr("readonly",true);
+			}else{
+				$("#tablaDireccion").show("slow");
+				$("#selectDireccion").hide("slow");
+				$("#txtNombreLugar").attr("readonly",false);
+				$("#txtTelefonoLugar").attr("readonly",false);
+			}
+				$("#txtNombreLugar").val("");
+				$("#txtTelefonoLugar").val("");
+				$("#txtObservaciones").val("");
+				$("#txtObservacionesLugar").val("");
+		});
+		
+		$("#selectDireccion").change(function(){
+			$("select option:selected").each(function(){
+				if($(this).index() != 0){
+					valorKeyId = $(this).val()
+					$.getJSON("/ajaxRequest?opcion=obtenerSedeKeyId",{keyId:valorKeyId}, function(data){
+						$("#txtNombreLugar").val(data.nombre);
+						$("#txtTelefonoLugar").val(data.telefono);	
+						$("#txtObservacionesLugar").val(data.descripcion);
+					});
+				}
+				
+			});
+		});
+		
+		
+		$("#selectDireccionSede").change(function(){
+			if($(this).prop("selectedIndex") == 0){
+				window.open('popup_sede_registrar.html', '_blank', 'scrollbars=1, height=600, width=500');
+			}
+		});
+		
+		
+		$('form[name=formRegistro]').submit(function(){
+			$.noty.closeAll()
+			dataString = $(this).serialize();
+			$.ajax({
+				type:'POST',
+				url:'/lugarPrestacionServicio',
+				data:dataString+'&btnConfirmarRegistro=btnConfirmarRegistro',
+				dataType:'json',
+				success:function(responseData){
+					if (responseData.calle!=null)	{
+						validateElementFromJsonResponse("OK", responseData.nombre, $('input[name=nombre]'));
+		                validateElementFromJsonResponse("OK", responseData.calle, $('input[name=calle]'));	
+		                validateElementFromJsonResponse("OK", responseData.numeroCalle, $('input[name=numeroCalle]'));
+						validateElementFromJsonResponse("OK", responseData.provincia, $('input[name=provincia]'));
+						validateElementFromJsonResponse("OK", responseData.localidad, $('input[name=localidad]'));
+					}				
+					if (responseData.responseStatus == "OK"){
+						window.location.replace('/lugarPrestacionServicio?opcion=index&msgCode=95&txt='+$('input[name=nombre]').val());
+					}else{
+						noty({force: true, timeout: false, text: responseData.errorMessage, type: 'error'});
+					}
+				}
+					
+			});
+			return false;
+		});	
+		
+	})
+</script>
+	{% if mensajeInformacion %}
+		<h3>{{ mensajeInformacion }}</h3> <br>
+	{% endif %}
+	<h2>Registrar Lugar Prestación Servicio</h2>
+	<form  method="post" action="/lugarPrestacionServicio" name='formRegistro' >
+		<fieldset>
+			<legend>Direccion</legend>
+			Es en una sede del sindicato?: 
+			 <input type="radio" name="radioDireccion" value="S">Si
+			 <input type="radio" name="radioDireccion" value="N">No
+			<div id="tablaDireccion">
+				<table>
+					<tr>
+						<td>Calle: </td><td><input type="text" name="calle"/></td>
+					</tr>
+					<tr>
+						<td>Numero: </td><td><input type="text" name="numeroCalle"/></td>
+					</tr>
+					<tr>
+						<td>Provincia: </td><td><input type="text" name="provincia"/></td>
+					</tr>
+					<tr>
+						<td>Localidad: </td><td><input type="text" name="localidad"/></td>
+					</tr>
+					<tr><td>C.P: </td><td><input type="text" name="codigoPostal"/></td></tr>
+				</table>
+			</div>
+			<div id="selectDireccion">
+				<select name="selectDireccionSede" id="selectDireccionSede">
+					<option value="nuevaSede">Cargar nueva Sede...</option>
+					{% if listaSedes %}
+						{% for sede in listaSedes %}
+							<option value="{{ sede.key() }}">{{ sede.nombre }} - {{sede.direccion.calle}} {{sede.direccion.numeroCalle}}  </option>
+						{% endfor %}
+					{% endif %}
+				</select>
+			</div>
+	    </fieldset>
+		<table id="one-column-emphasis">
+			<tr><td>Nombre:</td> <td><input type="text" name="nombre" id="txtNombreLugar" /></td></tr>
+			<tr><td>Telefono:</td> <td><input type="text" name="telefono" id="txtTelefonoLugar" /></td></tr>
+			<tr><td>Observaciones:</td> <td> <textarea name="txtObservaciones" id="txtObservacionesLugar" rows = "5" cols="40" ></textarea></td></tr>
+		</table>
+	    <br>   
+		<input type="submit" value="Registrar" style="width: 150px;" class="button-class" name="btnConfirmarRegistro"/>
+		<input type="submit" value="Cancelar" 
+			onclick="window.location='/'; return false;"  style="width: 150px;" class="button-class"/>
+	</form>
+	{% if error %}
+		<p>{{ error }}</p>
+	{% endif %}
+	
+{% endblock %}

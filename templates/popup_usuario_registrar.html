@@ -1,0 +1,213 @@
+{% extends "_base_popup.html" %}
+{% block title %}
+	SIGS.:.Nuevo Usuario
+{% endblock %}
+{% block bodycontent %}
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$('input[name="fechaNacimiento"]').datepicker();
+				$('#encargadoSede').submit(function(){
+					$.noty.closeAll()
+					//datos Usuario
+					var primerNombre = $('input[name="primerNombre"]')
+					var segundoNombre = $('input[name="segundoNombre"]')
+		            var primerApellido = $('input[name="primerApellido"]')
+		            var segundoApellido = $('input[name="segundoApellido"]')
+		            var telefono = $('input[name="telefono"]')
+		            var telefonoReferencia = $('input[name="telefonoReferencia"]')
+		            var txtDescripcion = $('textarea[name="txtDescripcionEncargado"]').val()
+		            var fechaNacimiento = $('input[name="fechaNacimiento"]')
+		            var lugarNacimiento = $('input[name="lugarNacimiento"]')
+		            var documento = $('input[name="documento"]')
+		            var sexo = $('input[name="sexo"]')
+					//datos Direccion Usuario
+					var encargadoCalle = $('input[name="encargadoCalle"]')
+		            var encargadoNumeroCalle = $('input[name="encargadoNumeroCalle"]')
+		            var encargadoProvincia = $('input[name="encargadoProvincia"]')
+		            var encargadoLocalidad = $('input[name="encargadoLocalidad"]')
+		            var encargadoCodigoPostal = $('input[name="encargadoCodigoPostal"]')
+					
+					var hiddenField =  $('input[name="opcionEncargado"]').val()
+					
+					
+					//validaciones JS
+					var array = [
+								 validarCampoTexto($(primerNombre), 'Ingrese un nombre valido', 'string'),
+								 validarCampoTexto($(primerApellido), 'Ingrese un apellido valido', 'string'),
+								 validarCampoTexto($(telefono), 'Ingrese un telefono valido', 'number'),
+								 validarCampoTexto($('textarea[name="txtDescripcionEncargado"]'), 'Ingrese una descripcion valida', 'string'),
+								 validarCampoTexto($(fechaNacimiento), 'Ingrese una fecha de nacimiento valida'),
+								 validarCampoTexto($(lugarNacimiento), 'Ingrese un lugar de nacimiento valido', 'string'),
+								 validarCampoTexto($(documento), 'Ingrese un documento valido', 'string'),
+								 //validarCampoTexto($(sexo), 'Ingrese un sexo', 'string'),
+								 validarCampoTexto($(encargadoCalle), 'Ingrese una calle valida', 'string'),
+								 validarCampoTexto($(encargadoNumeroCalle), 'Ingrese un numero de calle valido', 'number'),
+								 validarCampoTexto($(encargadoProvincia), 'Ingrese una provincia valida', 'string'),
+								 validarCampoTexto($(encargadoLocalidad), 'Ingrese una localidad valida', 'string')
+					             ]
+
+					if (!validateArray(array, 'error', 'Verifique los campos invalidos...', false, 'top')){
+						return false;
+					}
+
+					var dataString = 'primerNombre='+$(primerNombre).val()+'&segundoNombre='+$(segundoNombre).val()+'&primerApellido='+$(primerApellido).val()+
+									 '&segundoApellido='+$(segundoApellido).val()+'&telefono='+$(telefono).val()+'&telefonoReferencia='+$(telefonoReferencia).val()+
+									 '&txtDescripcion='+txtDescripcion+'&fechaNacimiento='+$(fechaNacimiento).val()+'&lugarNacimiento='+$(lugarNacimiento).val()+
+									 '&documento='+$(documento).val()+'&sexo='+$(sexo).val()+'&encargadoCalle='+$(encargadoCalle).val()+'&encargadoNumeroCalle='+$(encargadoNumeroCalle).val()+
+									 '&encargadoProvincia='+$(encargadoProvincia).val()+'&encargadoLocalidad='+$(encargadoLocalidad).val()+'&encargadoCodigoPostal='+$(encargadoCodigoPostal).val()+
+									 '&opcion='+hiddenField;
+					$.ajax({
+						type: "POST",
+						url: "/registro",
+						data: dataString,
+						dataType: "json",
+						success: function(responseData){
+							mensajeError = '';
+							if (!validateElementFromJsonResponseMarkField("OK", responseData[0].diccioDatosForm.primerNombre, $(primerNombre), $(primerNombre).val()))
+								mensajeError += "\n -"+responseData[0].diccioDatosForm.primerNombre;
+							if(!validateElementFromJsonResponseMarkField("OK", responseData[0].diccioDatosForm.segundoNombre, $(segundoNombre), $(segundoNombre).val()))
+								mensajeError += "\n -"+responseData[0].diccioDatosForm.segundoNombre;
+							if(!validateElementFromJsonResponseMarkField("OK", responseData[0].diccioDatosForm.primerApellido, $(primerApellido), $(primerApellido).val()))
+								mensajeError += "\n -"+responseData[0].diccioDatosForm.primerApellido;
+							if(!validateElementFromJsonResponseMarkField("OK", responseData[0].diccioDatosForm.segundoApellido, $(segundoApellido), $(segundoApellido).val()))
+								mensajeError += "\n -"+responseData[0].diccioDatosForm.segundoApellido;
+							if(!validateElementFromJsonResponseMarkField("OK", responseData[0].diccioDatosForm.fechaNacimiento, $(fechaNacimiento), $(fechaNacimiento).val()))
+								mensajeError += "\n -"+responseData[0].diccioDatosForm.fechaNacimiento;
+							if (!validateElementFromJsonResponseMarkField("OK", responseData[0].diccioDatosForm.lugarNacimiento, $(lugarNacimiento), $(lugarNacimiento).val()))
+								mensajeError += "\n -"+responseData[0].diccioDatosForm.lugarNacimiento;
+							if(!validateElementFromJsonResponseMarkField("OK", responseData[0].diccioDatosForm.documento, $(documento), $(documento).val()))
+								mensajeError += "\n -"+responseData[0].diccioDatosForm.documento;
+							if (!validateElementFromJsonResponseMarkField("OK", responseData[0].diccioDatosForm.encargadoCalle, $(encargadoCalle), $(encargadoCalle).val()))
+								mensajeError += "\n -"+responseData[0].diccioDatosForm.encargadoCalle;
+							if (!validateElementFromJsonResponseMarkField("OK", responseData[0].diccioDatosForm.encargadoNumeroCalle, $(encargadoNumeroCalle), $(encargadoNumeroCalle).val()))
+								mensajeError += "\n -"+responseData[0].diccioDatosForm.encargadoNumeroCalle;
+							if(!validateElementFromJsonResponseMarkField("OK", responseData[0].diccioDatosForm.encargadoProvincia, $(encargadoProvincia), $(encargadoProvincia).val()))
+								mensajeError += "\n -"+responseData[0].diccioDatosForm.encargadoProvincia;
+							if(!validateElementFromJsonResponseMarkField("OK", responseData[0].diccioDatosForm.encargadoLocalidad, $(encargadoLocalidad), $(encargadoLocalidad).val()))
+								mensajeError += "\n -"+responseData[0].diccioDatosForm.encargadoLocalidad;
+							if (responseData[0].diccioDatosForm.responseStatus == "OK"){
+								var newSelect = $('<select id="selectUsuarioEncargado" name="selectUsuarioEncargado"/>');
+								newSelect.append('<option>Registrar nuevo Usuario...</option>')
+								$.each(responseData[1].listaEncargados, function(index, itemData) {
+									alert(($(primerNombre).val()+' '+$(primerApellido).val())+'   '+responseData[1].listaEncargados[index].nombre)
+									if (($(primerNombre).val()+' '+$(primerApellido).val()) == responseData[1].listaEncargados[index].nombre){
+										newSelect.append('<option value="' + responseData[1].listaEncargados[index].keyId + '" selected = "selected">' + responseData[1].listaEncargados[index].nombre + '</option>');	//default selected para que el usuario recien insertado venga seleccionado
+										alert('dentro del if')
+									}else{
+							            newSelect.append('<option value="' + responseData[1].listaEncargados[index].keyId + '" >' + responseData[1].listaEncargados[index].nombre + '</option>');
+							            alert('en el else')
+									}
+								});
+								newSelect.append('</select>')
+						        window.opener.jQuery('#selectUsuarioEncargado').replaceWith(newSelect);
+								window.opener.invokeSuccessNotification('El encargado '+$(primerNombre).val()+' '+$(primerApellido).val()+' fue agregado');
+						        window.close();
+							}else{
+								noty({layout:'top', force: true, timeout: false, text: mensajeError+'-'+responseData[0].diccioDatosForm.errorMessage, type: 'error'});
+							}
+							
+							
+						}
+					});
+					return false;
+				});
+			});
+		</script>
+		<div id="stylized" class="myform">
+			<form method="post" action="/registro" id="encargadoSede">
+				<h1>Usuario</h1>
+				<p>Registra un nuevo usuario</p>
+				<label>Primer Nombre (*)
+				<span class="small">Agrega el primer nombre</span>
+				</label>
+				<input type="text" name="primerNombre" /><input type="hidden">
+				
+				<label>Segundo Nombre
+				<span class="small">Agrega el segundo nombre</span>
+				</label>
+				<input type="text" name="segundoNombre" /><input type="hidden">
+				
+				<label>Primer Apellido (*)
+				<span class="small">Agrega el primer apellido</span>
+				</label>
+				<input type="text" name="primerApellido" />
+				
+				<label>Segundo Apellido
+				<span class="small">Agrega el segundo apellido</span>
+				</label>
+				<input type="text" name="segundoApellido" />
+				
+				<label>Telefono (*)
+				<span class="small">Ingresa un numero telefonico de contacto</span>
+				</label>
+				<input type="text" name="telefono" />
+				
+				<label>Telefono Referencia
+				<span class="small">Agrega un telefono de referencia</span>
+				</label>
+				<input type="text" name="telefonoReferencia" />
+				
+				<label>Descripcion (*)
+				<span class="small">Ingresa una breve descripcion</span>
+				</label>
+				<textarea name="txtDescripcionEncargado" rows = "10" cols="35" ></textarea>
+				
+				<label>Fecha Nacimiento
+				<span class="small">Ingresa la fecha de nacimiento</span>
+				</label>
+				<input type="text" name="fechaNacimiento" id="fechaNacimiento"/>
+				
+				<label>Lugar Nacimiento
+				<span class="small">Ingresa el lugar de nacimiento</span>
+				</label>
+				<input type="text" name="lugarNacimiento" />
+				
+				<label>Documento
+				<span class="small">Ingresa el documeto</span>
+				</label>
+				<input type="text" name="documento" />
+				
+				<label>Sexo (*)
+				<span class="small">Masculino-Femenino</span>
+				</label>
+				<input type="radio" name="sexo"  value = "M" checked="checked">  
+				<input type="radio" name="sexo"  value = "F">
+				
+				<div class="spacer"></div>
+				
+				<fieldset >
+					<h1>Direccion</h1>
+					<p>Completa los datos de la direccion del usuario</p>
+					<label>Calle (*)
+					<span class="small">El nombre de la calle</span>
+					</label>
+					<input type="text" name="encargadoCalle"/>
+					
+					<label>Numero (*)
+					<span class="small">El nombre de la calle</span>
+					</label>
+					<input type="text" name="encargadoNumeroCalle"/>
+					
+					<label>Provincia (*)
+					<span class="small">El nombre de la calle</span>
+					</label>
+					<input type="text" name="encargadoProvincia"/>
+					
+					<label>Localidad (*)
+					<span class="small">El nombre de la calle</span>
+					</label>
+					<input type="text" name="encargadoLocalidad"/>
+					
+					<label>C.P
+					<span class="small">El nombre de la calle</span>
+					</label>
+					<input type="text" name="encargadoCodigoPostal"/>
+				</fieldset>
+				
+				<div class="spacer"></div>
+				
+				<input type="hidden" name="opcionEncargado" value="registrarEncargadoSede">
+				<input type="submit" id="submit" value="Enviar" name="btnRegistrarEncargadoSede"  style="float: right;width: 150px;">
+			</form>
+		</div>
+{% endblock %}

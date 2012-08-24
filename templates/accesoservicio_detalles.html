@@ -1,0 +1,111 @@
+{% extends "_base.html" %}
+{% block title %}
+	SIGS.:.Deuda {{ rsAccesoServicio.afiliado.usuario.primerNombre }} {{ rsAccesoServicio.afiliado.usuario.primerApellido }}
+{% endblock %}
+{% block bodycontent %}
+	<script type="text/javascript">
+		$(document).ready(function(){
+			chkNumeroCuotasAPagar = $('input[name=chkNumeroCuotasAPagar]')
+			form = $('form[name=formAccesoServicio]')
+			cuotaPagada = $(chkNumeroCuotasAPagar).filter(':checked').size()
+			montoAbonado = $('input[name=montoAbonado]')
+		    fechaPagoCuota = $('input[name=fechaPagoCuota]')
+		    txtObservaciones = $('textarea[name=txtObservaciones]')
+		    keyIdVale = $('input[name=keyIdVale]')
+		    keyIdAfiliado = $('input[name=keyIdAfiliado]')
+		  	btnRegistrarAccesoServicio = $('input[name=btnRegistrarAccesoServicio]')
+		  	
+		    //para setear la fecha actual al campo fechaPagoCuota
+			var myDate = new Date();
+			var fechaFormateada = myDate.getDate() + '/' + (myDate.getMonth()+1) + '/'+
+	        myDate.getFullYear();
+			$(fechaPagoCuota).val(fechaFormateada);
+			$(fechaPagoCuota).datepicker();
+			
+			$(form).submit(function(){
+				cuotaPagada = $(chkNumeroCuotasAPagar).filter(':checked').size()
+				dataString = 'cuotaPagada='+cuotaPagada+'&montoAbonado='+$(montoAbonado).val()+
+							 '&fechaPagoCuota='+$(fechaPagoCuota).val()+'&txtObservaciones='+$(txtObservaciones).val()+
+							 '&keyIdVale='+$(keyIdVale).val()+'&keyIdAfiliado='+$(keyIdAfiliado).val()+
+							 '&btnRegistrarAccesoServicio='+$(btnRegistrarAccesoServicio).val();
+				$.ajax(
+						{
+							url:'/accesoServicios',
+							data: dataString,
+							type: 'POST',
+							dataType:"json",
+							success: function(responseData){
+								if(responseData.responseStatus == 'OK'){
+									//hacer que se muestre un mensaje con el nuevo usuario agregado
+									window.location.replace('/accesoServicios?opcion=showmedo')
+								}else{
+									window.location.replace('/errorPage')
+								}
+							}
+						}
+				);
+				
+				return false;
+			});
+			
+			//calcular el monto a abonar de acuerdo a la cantidad de cuotas seleccionadas
+			$(chkNumeroCuotasAPagar).click(function(){
+					montoCuotaPorCheckbox = {{ montoPagarPorCuota }}
+					montoAbonadoVal = $(montoAbonado).val()
+					if ($(this).is(':checked'))
+						$(montoAbonado).val(parseInt(montoCuotaPorCheckbox) + parseInt(montoAbonadoVal))
+					else
+						$(montoAbonado).val(parseInt(montoAbonadoVal) - parseInt(montoCuotaPorCheckbox))
+				}
+			);
+			
+		});
+	</script>
+	
+	<h1>Afiliado  {{ rsAccesoServicio.afiliado.usuario.primerNombre }} {{ rsAccesoServicio.afiliado.usuario.segundoNombre }} 
+				  {{ rsAccesoServicio.afiliado.usuario.primerApellido }} {{ rsAccesoServicio.afiliado.usuario.segundoApellido }}</h1>
+	<br>
+	<h1>Servicio {{ rsAccesoServicio.vale.servicio.nombre }}</h1>
+	<br>
+	<form name="formAccesoServicio">
+		<fieldset>
+			<legend>Datos Generales</legend>
+			<table>
+				<tr><td>Monto del servicio: {{ rsAccesoServicio.vale.monto }}</td></tr>
+				<tr><td>Numero de cuotas: {{ rsAccesoServicio.vale.numeroCuotas }}</td></tr>
+				<tr><td>Fecha Prestacion: {{ rsAccesoServicio.vale.fechaPrestacion.strftime('%d/%m/%Y') }}</td></tr>
+				<tr><td>Observaciones: {{ rsAccesoServicio.vale.observaciones }}</td></tr>
+				<tr><td>Numero de Autorizacion: {{ rsAccesoServicio.vale.numeroAutorizacion }}</td></tr>
+				<tr><td>Recibo de sueldo: {{ rsAccesoServicio.vale.reciboSueldoNro }}</td></tr>
+				<tr>
+					<td>Vale canjeable en: </td>
+				</tr>
+				<tr>
+					{% for lugar in rsAccesoServicio.vale.listaLugaresPrestacionServicio %}
+						<td>{{ lugar }} </td>
+					{% endfor %}
+				</tr>
+			</table>
+		</fieldset>
+		<fieldset>
+			<legend>Pago de Deuda</legend>
+				<table>
+					<tr>
+						<td>Numero de cuotas a pagar: </td>
+						<td>
+							{% for number in range(rsAccesoServicio.vale.numeroCuotas - rsAccesoServicio.vale.numeroCuotasPagadas) %}
+								<input type="checkbox" name="chkNumeroCuotasAPagar" value="{{ number }}">
+							{% endfor %}
+						</td>
+					</tr>
+					<tr><td>Monto a abonar:</td><td><input type="text" name="montoAbonado" readonly="readonly" value="0"></td></tr>
+					<tr><td>Fecha pago de cuota:</td><td><input type="text" name="fechaPagoCuota" ></td></tr>
+					<tr><td>Observaciones:</td> <td> <textarea name="txtObservaciones" rows = "5" cols="40" >Comentarios acerca de esta transaccion...</textarea></td></tr>
+				</table>
+		</fieldset>
+		<input type="hidden" value="{{ rsAccesoServicio.vale.key() }}" name="keyIdVale">
+		<input type="hidden" value="{{ rsAccesoServicio.afiliado.key() }}" name="keyIdAfiliado"> 
+		<br>
+		<input type="submit" name="btnRegistrarAccesoServicio" value="Confirmar" class='button-class' style="width: 150px;">
+	</form>
+{% endblock %}

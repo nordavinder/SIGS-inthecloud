@@ -1,0 +1,59 @@
+{% extends "_base.html" %}
+{% block title %}
+	SIGS.:.Registro
+{% endblock %}
+{% block bodycontent %}
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('form[name=formRegistro]').submit(function(){
+			var array = [
+						 validarCampoTexto($('input[name=nombre]'), 'Ingrese un nombre valido', 'string'),
+						 validarCampoTexto($('input[name=apellido]'), 'Ingrese un apellido valido', 'string')
+			             ]
+
+			if (!validateArray(array, 'error', 'Verifique los campos invalidos...', false, 'top')){
+				return false;
+			}
+			
+			
+			nombre = $('input[name=nombre]')
+			apellido = $('input[name=apellido]')
+			opcion = $('input[name=opcion]').val()
+			
+			dataString = 'nombre='+$(nombre).val()+'&apellido='+
+						  $(apellido).val()+'&opcion='+opcion;
+			$.ajax({
+				type:'POST',
+				url:'/registro',
+				data:dataString,
+				dataType:'json',
+				success:function(responseData){
+					validateElementFromJsonResponse("OK", responseData.nombre, $(nombre));
+					validateElementFromJsonResponse("OK", responseData.apellido, $(apellido));
+					if (responseData.responseStatus == "OK"){
+						window.location.replace('/procesarPagina?opcion=index&msgCode=45&txt='+$(nombre).val()+' '+$(apellido).val());
+					}else{
+						noty({force: true, timeout: false, text: responseData.errorMessage, type: 'error'});
+					}
+				}
+					
+			});
+			return false;
+		});	
+	})
+</script>
+	{% if mensajeInformacion %}
+		<h3>{{ mensajeInformacion }}</h3> <br>
+	{% endif %}
+	<h2>Registro</h2>
+	<form  method="post" action="/registro" name="formRegistro">
+		<table id="one-column-emphasis">
+			<tr><td>Nombre:</td> <td><input type="text" name="nombre"/></td></tr>
+			<tr><td>Apellido:</td><td> <input type="text" name="apellido"/></td></tr>
+		</table>
+		<input type="submit" value="Registrar" class="button-class"/>
+		<input type="hidden" value="registrarUsuario" name="opcion">
+		<input type="submit" value="Cancelar" 
+			onclick="window.location='/'; return false;" class="button-class"/>
+	</form>
+{% endblock %}

@@ -1,0 +1,212 @@
+@CHARSET "ISO-8859-1";
+* {
+  margin:0px;
+  padding:0px;
+  font-family:"Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+}
+
+body
+{
+	background:url('cloud-background-resized.jpg') no-repeat center center fixed;
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;
+	color:#669;
+}
+
+#contenedor
+{
+  width:80%;
+  /*centrar el contenedor*/
+  margin-left: auto; margin-right: auto;
+  margin-top: 2%;
+  border:1px #000;
+  /*controla el interlineado de los textos*/
+  line-height:130%;
+  background-color:#f2f2f2; 
+  padding: 3px;
+  border-top-width: 4px;
+    border-bottom-width: 4px;
+    border-top-style: double;
+    border-bottom-style: double;
+    border-top-color: #becdde;
+    border-bottom-color: #becdde;
+   
+}
+#cabecera
+{
+  padding:30px;
+  color:#fff; /*el color del texto*/
+  background-color:#becdfe;
+  /*para que no tenga elementos flotantes a la izquierda*/
+  clear:left;
+}
+
+#container_columnas{
+	/*background-color: red;*/
+	width:100%;
+	
+}
+
+#columna1
+{
+  /*flotar a la izquierda*/
+  float: left;
+  width:190px;
+  height:40%;
+  border-right:1px dotted #aaa;
+  /*background-color: black;*/
+  margin:0;/*no tiene efecto este margin*/
+  padding:1em;/*con este padding se llena el espacio del contenedor*/
+}
+#columna2
+{
+  margin-left:210px;
+  padding:1em;
+}
+#pie {
+  padding:10px;
+  color:#fff;
+  background-color:#becdfe;
+  clear:left;
+  text-align:center;
+}
+
+#usuario_status{
+	float: right;
+}
+
+
+/* manejo de la lista del menu  */
+#navcontainer ul
+{
+list-style-type: none;
+text-align: left;
+}
+
+#navcontainer li
+{
+margin-top: 0.3em;
+}
+
+#navcontainer ul li a
+{
+background: transparent url(cloud-icon-backgroundcolor.jpg) left center no-repeat;
+padding-left: 30px;
+text-align: left;
+font: normal 15px "Lucida Grande", "Lucida Sans Unicode", verdana, lucida, sans-serif;
+text-decoration: none;
+color: #999;
+}
+
+#navcontainer ul li a:hover
+{
+background: transparent url(cloud-icon-rain-backgroundcolor.jpg) left center no-repeat;
+color: black;
+}
+
+/*manejo de tablas*/
+
+#one-column-emphasis{
+	font-size:12px;
+	width:680px;
+	text-align:left;
+	border-collapse:collapse;
+	margin:20px;
+}
+#one-column-emphasis th{
+	font-size:14px;
+	font-weight:normal;
+	color:#039;
+	padding:12px 15px;
+}
+#one-column-emphasis td{
+	color:#669;
+	border-top:1px solid #e8edff;
+	padding:10px 15px;
+}
+.oce-first{
+	background:#d0dafd;
+	border-right:10px solid transparent;
+	border-left:10px solid transparent;
+}
+#one-column-emphasis tr:hover td
+{
+	color:#339;
+	background:#eff2ff;
+}
+
+/*manejo de botones*/
+
+
+.button-class {
+ background-color: #becdfe;
+ -moz-border-radius: 5px;
+ -webkit-border-radius: 5px;
+ -moz-box-shadow: 3px 3px 1px #999;
+ -webkit-box-shadow: 3px 3px 1px #999;
+ border: solid 1px #CCC;
+ font-size:14px;
+ color: #ffffff;
+ text-shadow: 1px 1px 2px #000000;
+ height: 30px;
+ }
+
+ .button-class:hover {
+ background-color: #f2f2f2;
+ }
+ 
+ .input-text { font-family: Tahoma, Verdana, Arial; 
+ 	font-size: 11px; 
+ 	color: #FFFFFF; 
+ 	background-color: #becdfe; 
+ 	border: #000099; 
+ 	border-style: solid; 
+	border-width: 1px;
+	height: 20px;
+ }
+ .input-textArea { font-family: Tahoma, Verdana, Arial; 
+ 	font-size: 11px; 
+ 	color: #FFFFFF; 
+ 	background-color: #becdfe; 
+ 	border: #000099; 
+ 	border-style: solid; 
+	border-width: 1px;
+	height: 80px;
+ }
+ 
+ 
+.selected {
+ 			 border:1px solid #fafafa;
+			 -webkit-box-shadow:0 0 6px #007eff;
+			 -moz-box-shadow:0 0 5px #007eff;
+			 box-shadow:0 0 5px #007eff;
+			 outline: none;
+}
+
+input:focus,textarea:focus,select:focus{
+  border:1px solid #fafafa;
+  -webkit-box-shadow:0 0 6px #007eff;
+  -moz-box-shadow:0 0 5px #007eff;
+  box-shadow:0 0 5px #007eff;
+  outline: none;
+}
+
+.invalid-field{
+  border:1px solid #fc4444;
+  -webkit-box-shadow:0 0 6px #fc4444;
+  -moz-box-shadow:0 0 5px #fc4444;
+  box-shadow:0 0 5px #fc4444;
+  outline: none;
+}
+
+#notify {
+    position: fixed;
+    right: 10px;
+    bottom: -200px;
+    width: 150px;
+    line-height: 80px;
+    text-align: center;
+    background-color: #ccc;
+}	

@@ -1,0 +1,136 @@
+{% extends "_base_popup.html" %}
+{% block title %}
+	SIGS.:.Sedes
+{% endblock %}
+{% block bodycontent %}
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('#sedeForm').submit(function(){
+			var nombre = $('input[name="nombre"]').val()
+			var telefono = $('input[name="telefono"]').val()
+			var descripcion = $('input[name="txtDescripcion"]').val()
+			var fechaCreacion = $('input[name="fechaRegistro"]').val()
+			var sedePrincipal = $('input[name="chkSedePrincipal"]')
+			if ($(sedePrincipal).is(":checked")){
+				$(sedePrincipal).val("S");
+			}else{
+				$(sedePrincipal).val("N");
+			}
+			var sedePrincipal = $(sedePrincipal).val();
+			//datos Direccion Usuario
+			var calle = $('input[name="calle"]').val()
+            var numeroCalle = $('input[name="numeroCalle"]').val()
+            var provincia = $('input[name="provincia"]').val()
+            var localidad = $('input[name="localidad"]').val()
+            var codigoPostal = $('input[name="codigoPostal"]').val()
+            
+            var btnConfirmarRegistroAjax = $('input[name="btnConfirmarRegistroAjax"]').val()
+                        
+            dataString = 'calle='+calle+'&numeroCalle='+numeroCalle+'&provincia='+provincia+
+                         '&localidad='+localidad+'&codigoPostal='+codigoPostal+'&nombre='+nombre+
+                         '&telefono='+telefono+'&chkSedePrincipal='+sedePrincipal+
+            			 '&txtDescripcion='+descripcion+'&fechaRegistro='+fechaCreacion+
+            			 '&btnConfirmarRegistroAjax='+btnConfirmarRegistroAjax;
+            $.ajax({
+            	type: "POST",
+            	url: "/sede",
+            	data: dataString,
+            	dataType: "json",
+            	success: function(responseData){
+            		var newSelect = $('<select id="selectDireccionSede" name="selectDireccionSede" />');
+            		newSelect.append('<option value="load">Registrar nuevo Usuario...</option>')
+            		$.each(responseData, function(index, itemData){
+            			if (( nombre + ' - '+calle + ' ' +numeroCalle ) == responseData[index].nombre){
+            				newSelect.append('<option value="'+ responseData[index].keyId+'" selected="selected">'+(nombre + ' - '+calle + ' ' +numeroCalle)+'</option>');
+            			}else{
+            				newSelect.append('<option value="'+ responseData[index].keyId+'" >'+(nombre + ' - '+calle + ' ' +numeroCalle)+'</option>');            			
+            			}
+            		});
+            		newSelect.append('</select>');
+            		window.opener.jQuery('#selectDireccionSede').replaceWith(newSelect);
+            		window.opener.jQuery('#txtNombreLugar').val(nombre);
+            		window.opener.jQuery('#txtTelefonoLugar').val(telefono);
+            		window.opener.jQuery('#txtObservacionesLugar').attr("readonly",true);
+            		window.opener.jQuery('#txtObservacionesLugar').val(descripcion);
+            		window.close();
+            		window.opener.invokeSuccessNotification('La sede '+nombre+' fue registrada con exito');
+            	}
+            });
+            
+            return false;
+		});
+	
+	
+		//para setear la fecha actual al campo fechaCreacion
+		var myDate = new Date();
+		var fechaFormateada = myDate.getDate() + '/' + (myDate.getMonth()+1) + '/'+
+        myDate.getFullYear();
+		$("#fechaInicialRegistro").val(fechaFormateada);
+		$("#fechaInicialRegistro").datepicker();
+	
+		$("#fechaNacimiento").datepicker();
+		
+	});
+	
+</script>
+	<div id="stylized" class="myform">
+		<form  method="post" action="/sede" name='formRegistro' id="sedeForm">
+			<h1>Sede</h1>
+			<p>Registra una nueva sede</p>
+			<label>Nombre
+			<span class="small">Agrega tu nombre</span>
+			</label>
+			<input type="text" name="nombre"/>
+			
+			<label>Telefono
+			<span class="small">Agrega tu telefono</span>
+			</label>
+			<input type="text" name="telefono"/>
+			
+			<label>Descripcion
+			<span class="small">Lo que quieras describir</span>
+			</label>
+			<textarea name="txtDescripcion" rows = "10" cols="35" ></textarea>
+			
+			<label>Fecha Creacion
+			<span class="small">La fecha de creacion</span>
+			</label>
+			<input type="text" name="fechaRegistro" id="fechaInicialRegistro" />
+			
+			<label>Sede Principal
+			<span class="small">Lo que quieras describir</span>
+			</label>
+			<input type="checkbox" name="chkSedePrincipal" value="S">
+			<div class="spacer"></div>
+			<fieldset >
+				<h1>Direccion</h1>
+				<p>Completa los datos de la direccion del usuario</p>
+				<label>Calle
+				<span class="small">El nombre de la calle</span>
+				</label>
+				<input type="text" name="calle"/>
+				
+				<label>Numero
+				<span class="small">El nombre de la calle</span>
+				</label>
+				<input type="text" name="numeroCalle"/>
+				
+				<label>Provincia
+				<span class="small">El nombre de la calle</span>
+				</label>
+				<input type="text" name="provincia"/>
+				
+				<label>Localidad
+				<span class="small">El nombre de la calle</span>
+				</label>
+				<input type="text" name="localidad"/>
+				
+				<label>C.P
+				<span class="small">El nombre de la calle</span>
+				</label>
+				<input type="text" name="codigoPostal"/>
+			</fieldset>
+			<input type="submit" value="Registrar"  name="btnConfirmarRegistroAjax"/>
+		</form>
+	</div>
+{% endblock %}

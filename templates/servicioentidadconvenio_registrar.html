@@ -1,0 +1,96 @@
+{% extends "_base.html" %}
+{% block title %}
+	SIGS.:.Registrar Servicio Entidad Convenio
+{% endblock %}
+{% block bodycontent %}
+<script type="text/javascript">
+	function invokeSuccessNotification(msg){
+		noty({force: true, timeout: 5000, layout : 'bottomRight', text: msg, type: 'information'});
+	}
+	$(document).ready(function(){
+		
+		$("#selectEntidadesConvenio").change(function(){
+			if($(this).prop("selectedIndex") == 0){
+				window.open('popup_entidad_convenio.html', '_blank', 'scrollbars=1, height=670, width=800');
+			}
+		});
+		$("#selectLugarPrestacionServicio").change(function(){
+			if($(this).prop("selectedIndex") == 0){
+				window.open('lugarPrestacionServicio?opcion=popup_registrar', '_blank', 'scrollbars=1, height=450, width=800');
+			}
+		});
+		
+		$('form[name=formRegistro]').submit(function(){
+			$.noty.closeAll()
+			dataString = $(this).serialize();
+			$.ajax({
+				type:'POST',
+				url:'/servicioEntidadConvenio',
+				data:dataString+'&btnConfirmarRegistro=btnConfirmarRegistro',
+				dataType:'json',
+				success:function(responseData){
+					validateElementFromJsonResponse("OK", responseData.entidadConvenio, $('select[name=selectEntidadesConvenio]'))
+					validateElementFromJsonResponse("OK", responseData.lugarPrestacion, $('select[name=selectLugarPrestacionServicio]'))
+					
+					if (responseData.responseStatus == "OK"){
+						window.location.replace('servicio?opcion=detalle&keyId='+$('input[name=servicioKeyId]').val()+'&msgCode=105');
+					}else{
+						noty({force: true, timeout: false, text: responseData.errorMessage, type: 'error'});
+					}
+				}
+					
+			});
+			return false;
+		});	
+		
+	})
+</script>
+	{% if mensajeInformacion %}
+		<h3>{{ mensajeInformacion }}</h3> <br>
+	{% endif %}
+	<h2>Registrar Servicio Entidad Convenio</h2>
+	<form  method="post" action="/servicioEntidadConvenio" name='formRegistro'>
+		<table id="one-column-emphasis">
+			<tr>
+				<td>Servicio:</td> 
+				<td>
+					<input type="text" value="{{ rsServicio.nombre }}" readonly="readonly">
+					<input type="hidden" value="{{ rsServicio.key() }}" name="servicioKeyId">
+				</td>
+			</tr>
+			<tr>
+			<td>Entidad del Convenio:</td> 
+			<td> 
+				<select name="selectEntidadesConvenio" id="selectEntidadesConvenio">
+					<option value="nuevaEntidadConvenio">Registrar Nueva Entidad</option>
+					{% if listaEntidadesConvenio %}
+						{% for entidad in listaEntidadesConvenio%}
+							<option value="{{entidad.key()}}">{{ entidad.nombre }}</option>
+						{% endfor %}
+					{% endif %}
+				</select>
+			</td>
+			</tr>
+			<tr>
+			<td>Lugar de prestacion del Servicio:</td> 
+			<td> 
+				<select name="selectLugarPrestacionServicio" id="selectLugarPrestacionServicio">
+					<option value="nuevoLugarPrestacionServicio">Registrar Nuevo Lugar</option>
+					{% if listaLugaresPrestacionServicos %}
+						{% for lugar in listaLugaresPrestacionServicos%}
+							<option value="{{lugar.key()}}">{{ lugar.nombre }} - {{ lugar.direccion.calle }} {{ lugar.direccion.numeroCalle }}</option>
+						{% endfor %}
+					{% endif %}
+				</select>
+			</td>
+			</tr>
+		</table>
+		<input type="submit" value="Registrar" style="width: 150px;"  class="button-class" name="btnConfirmarRegistro"/>
+		<input type="submit" value="Cancelar" 
+			onclick="window.location='/servicio'; return false;" style="width: 150px;" class="button-class"/>
+	</form>
+	{% if error %}
+		<p>{{ error }}</p>
+	{% endif %}
+	
+{% endblock %}

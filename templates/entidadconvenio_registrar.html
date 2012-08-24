@@ -1,0 +1,137 @@
+{% extends "_base.html" %}
+{% block title %}
+	Servicio.:.Entidad Convenio
+{% endblock %}
+{% block bodycontent %}
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("#selectUsuarioEncargado").change(function(){
+			if($(this).prop("selectedIndex") == 0){
+				window.open('popup_usuario_registrar.html', '_blank', 'scrollbars=1, height=600, width=600');
+			}
+		});
+		
+		$("#fechaExpiracion").datepicker();
+		//para setear la fecha actual al campo fechaCreacion
+		var myDate = new Date();
+		var fechaFormateada = myDate.getDate() + '/' + (myDate.getMonth()+1) + '/'+
+        myDate.getFullYear();
+		$("#fechaInicialRegistro").val(fechaFormateada);
+		$("#fechaInicialRegistro").datepicker();
+		
+		//esto va a deshabilitar el txtfield txtTipoEmpresa en caso de que se seleccione el 
+		//combo 'Otra'
+		
+		$('input[type=radio]').click(function(){
+			if($(this).attr('id')){ //se comprueba que el elemento tenga el atributo id seteado
+				$('#txtTipoEmpresa').prop("disabled",false);	
+			}else{
+				$('#txtTipoEmpresa').prop("disabled",true);
+			}	
+		});
+		
+		
+		//validaciones
+		$('form[name=formRegistro]').submit(function(){
+			//validaciones JS 
+			var array = [
+						 validarCampoTexto($('input[name=nombre]'), 'Ingrese un nombre valido', 'string'),
+						 validarCampoTexto($('input[name=fechaCreacion]'), 'Ingrese una fecha de contrato valida', 'string'),
+						 validarCampoTexto($('input[name=fechaExpiracion]'), 'Ingrese una fecha de expiracion valida', 'string'),
+						 validarCampoTexto($('textarea[name=txtCondicionesConvenio]'), 'Ingrese algunas condiciones validas', 'string'),
+						 validarCampoTexto($('input[name=calle]'), 'Ingrese una calle valida', 'string'),
+						 validarCampoTexto($('input[name=numeroCalle]'), 'Ingrese un numero de calle valido', 'number'),
+						 validarCampoTexto($('input[name=provincia]'), 'Ingrese una provincia valida', 'string'),
+						 validarCampoTexto($('input[name=localidad]'), 'Ingrese una localidad valida', 'string')
+			             ]
+
+			if (!validateArray(array, 'error', 'Verifique los campos invalidos...', false, 'top')){
+				return false;
+			}
+			
+			dataString = $(this).serialize();
+			$.ajax({
+				type:'POST',
+				url:'/entidadConvenio',
+				data:dataString+'&btnConfirmarRegistro=btnConfirmarRegistro',
+				dataType:'json',
+				success:function(responseData){
+					validateElementFromJsonResponse("OK", responseData.nombre, $('input[name=nombre]'));
+					validateElementFromJsonResponse("OK", responseData.fechaCreacion, $('input[name=fechaCreacion]'));
+					validateElementFromJsonResponse("OK", responseData.condicionesConvenio, $('textarea[name=txtCondicionesConvenio]'));
+					validateElementFromJsonResponse("OK", responseData.calle, $('input[name=calle]'));
+					validateElementFromJsonResponse("OK", responseData.numeroCalle, $('input[name=numeroCalle]'));
+					validateElementFromJsonResponse("OK", responseData.provincia, $('input[name=provincia]'));
+					validateElementFromJsonResponse("OK", responseData.localidad, $('input[name=localidad]'));
+					
+					if (responseData.responseStatus == "OK"){
+						window.location.replace('/entidadConvenio?opcion=index&msgCode=85&txt='+$('input[name=nombre]').val());
+					}else{
+						noty({force: true, timeout: false, text: responseData.errorMessage, type: 'error'});
+					}
+				}
+					
+			});
+			return false;
+		});	
+		
+	})
+</script>
+	{% if mensajeInformacion %}
+		<h3>{{ mensajeInformacion }}</h3> <br>
+	{% endif %}
+	<h2>Entidad Convenio - Registrar</h2>
+	<form  method="post" action="/entidadConvenio" name='formRegistro'>
+		<table id="one-column-emphasis">
+			<tr><td>Nombre (*):</td> <td><input type="text" name="nombre"/></td></tr>
+			<tr><td>Telefono:</td><td><input type="text" name="telefono" /></td></tr>
+			<tr><td>Fecha Contrato (*):</td><td><input type="text" name="fechaCreacion" id="fechaInicialRegistro" /></td></tr>
+			<tr><td>Fecha Expiracion (*):</td><td><input type="text" name="fechaExpiracion" id="fechaExpiracion" /></td></tr>
+			<tr><td>Condiciones Convenio (*):</td> <td> <textarea name="txtCondicionesConvenio" rows = "5" cols="40" >Registra bases y condiciones del convenio, etc.</textarea></td></tr>
+			<tr><td>Observaciones:</td> <td> <textarea name="txtObservaciones" rows = "5" cols="30" ></textarea></td></tr>
+		</table>
+		<fieldset name="fieldSetTipoEmpresa">
+			<legend>Tipo de Empresa (*)</legend>
+			Privada<input type="radio" name="radioTipoEmpresa" value="Privada" checked="checked">
+			Funcion Pública<input type="radio" name="radioTipoEmpresa" value="Funcion Publica"><br> 
+			Asociación<input type="radio" name="radioTipoEmpresa" value="Asociacion">
+			Autonoma<input type="radio" name="radioTipoEmpresa" value="Autonoma"><br>
+			Otra<input type="radio" name="radioTipoEmpresa" id="otroTipoEmpresa" value="Otra">
+			<input type="text" name="txtTipoEmpresa" id="txtTipoEmpresa" disabled="disabled">
+		</fieldset>
+		<fieldset>
+				<legend>Direccion</legend>
+				<table>
+					<tr>
+						<td>Calle (*): </td><td><input type="text" name="calle"/></td>
+					</tr>
+					<tr>
+						<td>Numero (*): </td><td><input type="text" name="numeroCalle"/></td>
+					</tr>
+					<tr>
+						<td>Provincia (*): </td><td><input type="text" name="provincia"/></td>
+					</tr>
+					<tr>
+						<td>Localidad (*): </td><td><input type="text" name="localidad"/></td>
+					</tr>
+					<tr><td>C.P: </td><td><input type="text" name="codigoPostal"/></td></tr>
+				</table>
+		</fieldset>	
+		<fieldset>
+			<legend>Usuario Encargado</legend>
+			<select id="selectUsuarioEncargado" name="selectUsuarioEncargado">
+			    <option value="load">Registrar nuevo Usuario...</option>
+			    {% for usuario in rsUsuarios %}
+				    <option value="{{ usuario.key() }}">{{ usuario.primerNombre }} {{ usuario.primerApellido }}</option>
+			    {% endfor %}
+			</select>
+		</fieldset><br>
+		<input type="submit" value="Registrar" style="width: 150px;" class="button-class" name="btnConfirmarRegistro"/>
+		<input type="submit" value="Cancelar" 
+			onclick="window.location='/'; return false;" style="width: 150px;"  class="button-class"/>
+	</form>
+	{% if error %}
+		<p>{{ error }}</p>
+	{% endif %}
+	
+{% endblock %}

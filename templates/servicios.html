@@ -1,0 +1,52 @@
+{% extends "_base.html" %}
+{% block title %}
+	SIGS.:.Servicios
+{% endblock %}
+{% block bodycontent %}
+	<script type="text/javascript">
+	$(document).ready(function(){
+		initSimpleTableSorter($("#myTable")); 
+		notifMsg = $('input[name=notifMsg]')
+		if($(notifMsg).length)
+			noty({force: true, timeout: false, text: $(notifMsg).val(), type: 'information'});
+	 });
+
+	</script>
+	<h1>Lista de servicios</h1>
+	<table id="myTable">
+	  {% if listaServicios %}
+		<thead>
+		    <tr>
+		  	  <th></th>
+		      <th>Nombre</th>
+			  <th>Descripcion</th>
+			  <th>Observaciones</th>
+		      <th>Mas Informacion</th>
+		    </tr>
+	    </thead>
+	    <tbody>
+		  	<form method="post" action="/servicio">
+				{% for servicio in listaServicios %}
+					<tr>
+						<td><input type="radio" name="radioServicios" value="{{ servicio.key() }}"></td>
+						<td>{{ servicio.nombre }}</td>
+					    <td>{{ servicio.descripcion }}</td>
+					    <td>{{ servicio.observaciones }}</td>
+					    <td><a href="/servicio?opcion=detalle&keyId={{ servicio.key() }}">+</a></td>
+			     	 </tr>
+				{% endfor %}
+				<br>
+				<input type="submit" value="Eliminar" name = "btnEliminar" style="width: 150px;" class='button-class'>
+				<input type="submit" value="Modificar" name = "btnModificar" style="width: 150px;margin-left: 10px;" class='button-class'>
+			</form>
+		</tbody>
+	  {% else %}
+	  	<br>El sindicato no dispone de servicios registrados.<br><br> 
+	  	<a href = '/servicio?opcion=registrar'>Click para adicionar un nuevo servicio al sindicato</a> 
+	  {% endif %}  
+	</table><br>
+	{% if notifMsg %}
+		<input type="hidden" name="notifMsg" value="{{ notifMsg }}" >
+	{% endif %}
+	<input type="button" name="btnRegistro" value="Registrar" style="width: 150px;" onclick="window.location='/servicio?opcion=registrar'" class='button-class'>
+{% endblock %}

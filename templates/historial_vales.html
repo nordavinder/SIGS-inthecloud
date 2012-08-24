@@ -1,0 +1,31 @@
+{% extends "_base.html" %}
+{% block title %}
+	SIGS (beta).:.Inicio
+{% endblock %}
+{% block bodycontent %}
+	<script>
+		$(document).ready(function(){
+			notifMsg = $('input[name=notifMsg]')
+			if($(notifMsg).length)
+				noty({force: true, timeout: false, text: $(notifMsg).val(), type: 'information'});
+		 });
+	</script>
+	<h1>Esta es la pagina de historial de vales</h1>
+	{% for anho in listaAnhos %}
+		<h2>{{ anho }}</h2>
+		{% if anho != anhoActual %}
+			<div style="margin-left: 30px;">
+				{% for mes in listaMeses %}
+					<a href="/accesoServicios?opcion=imprimirHistorial&anho={{ anho }}&mes={{ mes }}"><h4>{{mes}}</h4></a>
+				{% endfor %}
+			</div>
+		{% else %}
+			<div style="margin-left: 30px;">
+				{% for mes in listaMesesAnhoActual %}
+					<a href="/accesoServicios?opcion=imprimirHistorial&anho={{ anho }}&mes={{ mes }}"><h4>{{mes}}</h4></a>
+				{% endfor %}
+			</div>
+		{% endif %}
+	{% endfor %}
+	
+{% endblock %}

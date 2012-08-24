@@ -1,0 +1,317 @@
+{% extends "_base.html" %}
+{% block title %}
+	SIGS.:.Registrar Afiliado
+{% endblock %}
+{% block bodycontent %}
+<script type="text/javascript">
+	function invokeSuccessNotification(msg){
+		noty({force: true, timeout: 5000, layout : 'bottomRight', text: msg, type: 'information'});
+	}
+	$(document).ready(function(){
+		$('input[name="fechaDeIngreso"]').datepicker();	
+		
+		var divCargaFamiliar = $('#divCargaFamiliar')
+		var divDatosLaborales = $("#divDatosLaborales")
+		$(divCargaFamiliar).hide();
+		$(divDatosLaborales).hide();
+		$('input[name=radioParentesco]').click(function(){
+			if($(this).val() == 'TITULAR'){
+				$(divCargaFamiliar).hide();
+				$(divDatosLaborales).show();
+			}else{
+				$(divCargaFamiliar).show();
+				$(divDatosLaborales).hide();
+			}
+		});
+		
+		
+		$("#selectDireccionSede").change(function(){
+			if($(this).prop("selectedIndex") == 0){
+				window.open('popup_sede_registrar.html', '_blank', 'scrollbars=1, height=600, width=600');
+			}
+		});
+		
+		
+		$("#selectEntidadLaboral").change(function(){
+			if($(this).prop("selectedIndex") == 0){
+				window.open('popup_entidad_laboral.html','_blank','scrollbars=1, height=500, width=700');
+			}
+		});
+		
+		$("#fechaNacimiento").datepicker();
+		$("input[name=fechaRegistro]").datepicker();
+		
+		
+		
+		//validaciones del formulario
+		$('form[name=formRegistro]').submit(function(){
+			$.noty.closeAll()
+			dataString = $(this).serialize();
+			$.ajax({
+				type:'POST',
+				url:'/afiliado',
+				data:dataString+'&btnConfirmarRegistro=btnConfirmarRegistro',
+				dataType:'json',
+				success:function(responseData){
+					//alert(responseData.calle)
+					//if(responseData.primerNombre!=null){ 
+						validateElementFromJsonResponse("OK", responseData.primerNombre, $('input[name=primerNombre]'))
+						validateElementFromJsonResponse("OK", responseData.primerApellido, $('input[name=primerApellido]'))
+						validateElementFromJsonResponse("OK", responseData.primerApellido, $('input[name=primerApellido]'))
+						validateElementFromJsonResponse("OK", responseData.telefonoPrincipal, $('input[name=telefono]'))
+						validateElementFromJsonResponse("OK", responseData.descripcion, $('textarea[name=txtDescripcionafiliado]'))
+						validateElementFromJsonResponse("OK", responseData.fechaNacimiento, $('input[name=fechaNacimiento]'))
+						validateElementFromJsonResponse("OK", responseData.lugarNacimiento, $('input[name=lugarNacimiento]'))
+						validateElementFromJsonResponse("OK", responseData.documento, $('input[name=documento]'))
+					//} 
+					//if(responseData.datosDireccion=='ERR'){ 
+						validateElementFromJsonResponse("OK", responseData.calle, $('input[name=afiliadoCalle]'))
+						validateElementFromJsonResponse("OK", responseData.numeroCalle, $('input[name=afiliadoNumeroCalle]'))
+						validateElementFromJsonResponse("OK", responseData.provincia, $('input[name=afiliadoProvincia]'))
+						validateElementFromJsonResponse("OK", responseData.localidad, $('input[name=afiliadoLocalidad]'))
+					//} 
+					validateElementFromJsonResponse("OK", responseData.parentesco, $('#fieldsetParentesco'))
+					validateElementFromJsonResponse("OK", responseData.fechaRegistro, $('input[name=fechaRegistro]'))
+					validateElementFromJsonResponse("OK", responseData.antiguedadLaboral, $('input[name=antiguedadLaboral]'))
+					validateElementFromJsonResponse("OK", responseData.categoriaSuscripcion, $('input[name=categoriaSuscripcion]'))
+					validateElementFromJsonResponse("OK", responseData.sede, $('#fieldsetSede'))
+					validateElementFromJsonResponse("OK", responseData.cargaFamiliar, $('select[name=selectAfiliadoTitular]'))
+					validateElementFromJsonResponse("OK", responseData.parentescoAfiliadoTitular, $('input[name=parentescoAfiliado]'))
+					validateElementFromJsonResponse("OK", responseData.entidadLaboral, $('select[name=selectEntidadLaboral]'))
+					validateElementFromJsonResponse("OK", responseData.cargo, $('input[name=cargo]'))
+					validateElementFromJsonResponse("OK", responseData.sueldoBase, $('input[name=sueldoBase]'))
+					validateElementFromJsonResponse("OK", responseData.fechaDeIngreso, $('input[name=fechaDeIngreso]'))
+					validateElementFromJsonResponse("OK", responseData.sexo, $('#radioSexo'))
+					validateElementFromJsonResponse("OK", responseData.estadoCivil, $('#radioEstadoCivil'))
+					validateElementFromJsonResponse("OK", responseData.ocupacion, $('#radioOcupacion'))
+					
+					if (responseData.responseStatus == "OK"){
+						window.location.replace('/afiliado?opcion=index&msgCode=95&txt='+$('input[name=primerNombre]').val()+' '+$('input[name=primerApellido]').val());
+					}else{
+						noty({force: true, timeout: false, text: responseData.errorMessage, type: 'error'});//concatenar con el errorMessage que viene
+					}
+				}
+					
+			});
+			return false;
+		});	
+		
+		
+	});
+	
+</script>
+	<div id="pop"  style="display:none;"></div>
+	{% if mensajeInformacion %}
+		<h3>{{ mensajeInformacion }}</h3> <br>
+	{% endif %}
+	<h2>Registrar Afiliado</h2>
+	<form  method="post" action="/afiliado" name='formRegistro' >		
+		<fieldset>
+			<legend>Datos Generales</legend>
+			<table>
+						<tr>
+							<td>Primer Nombre (*):</td> <td><input type="text" name="primerNombre" /></td>
+						</tr>
+						<tr>
+							<td>Segundo Nombre:</td><td> <input type="text" name="segundoNombre" /></td>
+						</tr>
+						<tr>
+							<td>Primer Apellido (*):</td><td><input type="text" name="primerApellido" /></td>
+						</tr>
+						<tr>
+							<td>Segundo Apellido:</td><td> <input type="text" name="segundoApellido" /></td>
+						</tr>
+						<tr>
+							<td>Telefono (*):</td><td><input type="text" name="telefono" /></td>
+						</tr>
+						<tr>
+							<td>Telefono Referencia:</td><td><input type="text" name="telefonoReferencia" /></td>
+						</tr>
+						<tr>
+							<td>Descripcion (*):</td><td><textarea name="txtDescripcionafiliado" rows = "10" cols="50" ></textarea></td>
+						</tr>
+						<tr>
+							<td>Fecha Nacimiento (*):</td><td><input type="text" name="fechaNacimiento" id="fechaNacimiento" size="10"/></td>
+						</tr>
+						<tr>
+							<td>Lugar Nacimiento (*):</td><td><input type="text" name="lugarNacimiento" /></td>
+						</tr>
+						<tr>
+							<td>Documento (*):</td><td><input type="text" name="documento" /></td>
+						</tr>
+						<tr>
+							<td>
+								Sexo (*): <input type="radio" name="sexo"  value = "M"> M 
+									  <input type="radio" name="sexo"  value = "F">F
+									  <input type="hidden" id="radioSexo">
+							</td>
+						</tr>
+					</table>
+					<fieldset>
+							<legend>Direccion</legend>
+							<table>
+								<tr>
+									<td>Calle: </td><td><input type="text" name="afiliadoCalle"/></td>
+								</tr>
+								<tr>
+									<td>Numero: </td><td><input type="text" name="afiliadoNumeroCalle"/></td>
+								</tr>
+								<tr>
+									<td>Provincia: </td><td><input type="text" name="afiliadoProvincia"/></td>
+								</tr>
+								<tr>
+									<td>Localidad: </td><td><input type="text" name="afiliadoLocalidad"/></td>
+								</tr>
+								<tr><td>C.P: </td><td><input type="text" name="afiliadoCodigoPostal"/></td></tr>
+							</table>
+					</fieldset>
+		</fieldset>
+		
+		<fieldset>
+			<legend>Parentesco (*)</legend>
+			Titular<input type="radio" name="radioParentesco" value="TITULAR">
+			Carga Familiar<input type="radio" name="radioParentesco" value="CARGA_FAMILIAR"><br>
+			<input type="hidden" id="fieldsetParentesco">
+		</fieldset>
+		<fieldset>
+			<legend>Datos Afiliación</legend>
+			<table id="one-column-emphasis">
+				<tr><td>Carnet:</td> <td><input type="text" name="carnet"/></td></tr>
+				<tr><td>Categoria Profesional (titulo de mayor nivel):</td> <td><input type="text" name="categoriaProfesional"/></td></tr>
+				<tr><td>Lugar de Estudio:</td> <td><input type="text" name="lugarEstudio"/></td></tr>
+				<tr><td>
+					<fieldset>
+						<legend>Estado Civil (*)</legend>
+						Soltero<input type="radio" name="radioEstadoCivil" value="Soltero">
+						Casado<input type="radio" name="radioEstadoCivil" value="Casado"><br> 
+						Divorciado<input type="radio" name="radioEstadoCivil" value="Divorciado">
+						Separado<input type="radio" name="radioEstadoCivil" id="otroTipoEmpresa" value="Separado">
+						Viudo<input type="radio" name="radioEstadoCivil" value="Viudo"><br>
+					</fieldset>
+					<input type="hidden" id="radioEstadoCivil">
+				</td></tr>
+				<tr><td>Antiguedad Laboral (*):</td> <td><input type="text" name="antiguedadLaboral"/></td></tr>
+				<tr><td>Numero de Suscripción:</td> <td><input type="text" name="numeroSuscripcion"/></td></tr>
+				<tr><td>Fecha de Suscripción (*):</td> <td><input type="text" name="fechaRegistro"/></td></tr>
+				<tr><td>Categoria de Suscripción (*):</td> <td><input type="text" name="categoriaSuscripcion"/></td></tr>
+			</table>
+		</fieldset>
+		
+		<div id="divDatosLaborales">
+			<fieldset>
+				<legend>Datos Laborales</legend>
+				<table>
+					<tr><td>Entidad Laboral (*):</td> 
+						<td>
+							<div id="divEntidadLaboral">
+								<select name="selectEntidadLaboral" id="selectEntidadLaboral">
+									<option value="nuevaEntidadLaboral">Cargar nueva empresa...</option>
+									{% if listaEntidadLaboral %}
+										{% for entidad in listaEntidadLaboral %}
+											<option value="{{ entidad.key() }}">{{ entidad.nombre }} - {{entidad.direccion.calle}} {{entidad.direccion.numeroCalle}}  </option>
+										{% endfor %}
+									{% endif %}
+									<option></option>
+								</select>
+							</div>	
+						</td>
+					</tr>
+					<tr><td>
+						<fieldset>
+							<legend>Ocupación: </legend>
+							<table>
+								<tr>
+									<td>Asalariado <input type="radio" name="radioOcupacion" value="Asalariado"></td>
+									<td>Autonomo <input type="radio" name="radioOcupacion" value="Autonomo"></td>
+								</tr>
+								<tr>
+									<td>Cooperativista <input type="radio" name="radioOcupacion" value="Cooperativista"></td>
+									<td>Parado <input type="radio" name="radioOcupacion" value="Parado"></td>
+								</tr>
+								<tr>
+									<td>Jubilado <input type="radio" name="radioOcupacion" value="Jubilado"></td>
+									<td>Pensionado <input type="radio" name="radioOcupacion" value="Pensionado"></td>
+								</tr>
+							</table>
+						</fieldset>
+						<input type="hidden" id="radioOcupacion">
+					</td></tr>
+					<tr>
+						<td>Fecha de Ingreso (*): </td>
+						<td><input type="text" name="fechaDeIngreso"></td>
+					</tr>
+				    <tr>
+						<td>Cargo (*): </td>
+						<td><input type="text" name="cargo"></td>
+					</tr>
+					<tr>
+						<td>Departamento: </td>
+						<td><input type="text" name="departamento"></td>
+					</tr>
+					<tr>
+						<td>Sueldo Base (*): </td>
+						<td><input type="text" name="sueldoBase"></td>
+					</tr>
+				    <tr><td>
+						<fieldset>
+							<legend>Tipo de Contrato</legend>
+							<table>
+								<tr>
+									<td>Fijo <input type="radio" name="radioTipoContrato" value="Fijo"></td>
+									<td>Fijo Discontinuo <input type="radio" name="radioTipoContrato" value="Fijo Discontinuo"></td>
+								</tr>
+								<tr>
+									<td>Tiempo Parcial <input type="radio" name="radioTipoContrato" value="Tiempo Parcial"></td>
+									<td>Interinidad <input type="radio" name="radioTipoContrato" value="Interinidad"></td>
+								</tr>
+							</table>
+						</fieldset>
+					</td></tr>
+				    <tr>
+						<td>Contacto (dentro de la empresa): </td>
+						<td><input type="text" name="contacto"></td>
+					</tr>
+				</table>
+			</fieldset>
+		</div>
+		
+		<fieldset>
+			<legend>Sede (*)</legend>
+			<div id="selectDireccion">
+				<select name="selectDireccionSede" id="selectDireccionSede">
+					<option value="nuevaSede">Cargar nueva Sede...</option>
+					{% if listaSedes %}
+						{% for sede in listaSedes %}
+							<option value="{{ sede.key() }}">{{ sede.nombre }} - {{sede.direccion.calle}} {{sede.direccion.numeroCalle}}  </option>
+						{% endfor %}
+					{% endif %}
+				</select>
+			</div>
+			<input type="hidden" id="fieldsetSede">
+		</fieldset>
+		<br>
+		<div id="divCargaFamiliar">
+			<fieldset id="fieldsetCargaFamiliar">
+				<legend>Carga Familiar (*)</legend>
+				<table>
+					<tr><td>Afiliado
+						<select id="selectAfiliadoTitular" name="selectAfiliadoTitular">
+						    <option></option>
+						    {% for afiliado in listaAfiliadosTitulares %}
+							    <option value="{{ afiliado.key() }}">{{ afiliado.usuario.primerNombre }} {{ afiliado.usuario.primerApellido }}</option>
+						    {% endfor %}
+						</select>
+					</td></tr>
+					<tr><td>
+					Parentesco con el afiliado titular (*):
+					<input type="text" name="parentescoAfiliado"/>
+					</td></tr>
+				</table>
+			</fieldset>		
+		</div>
+		<br>
+		<input type="submit" value="Registrar" class="button-class" style="width: 150px;" name="btnConfirmarRegistro"/>
+		<input type="submit" value="Cancelar" 
+			onclick="window.location='/'; return false;"  style="width: 150px;" class="button-class"/>
+	</form>
+{% endblock %}

@@ -1,0 +1,114 @@
+{% extends "_base.html" %}
+{% block title %}
+	SIGS.:.Afiliado {{ rsAfiliado.usuario.primerNombre }} {{ rsAfiliado.usuario.primerApellido }}
+{% endblock %}
+{% block bodycontent %}
+	<script type="text/javascript">
+		$(document).ready(function(){
+			//para mostrar la ventana modal de la sede
+			var f = function outterFunction(element){
+				keyId = $(element).attr("id");
+				  $.getJSON(
+					  "/sede",
+					  {keyId : keyId, opcion : 'sedeJSON'}, 
+			  		  function(responseData){
+						  _array = responseData 
+						  construirDialogo($('#dialogSede'),'Sede',_array); 
+					  }
+				  )				
+			}
+			mostrarDialogo($('#dialogSede'),$('#sedeLink a'), f);
+			
+			
+			//para mostrar la ventana modal de la entidad laboral 
+			var func = function outterFunction(element){
+				keyId = $(element).attr("id");
+				  $.getJSON(
+					  "/entidadLaboral",
+					  {keyId : keyId, opcion : 'entidadLaboralJSON'}, 
+			  		  function(responseData){
+						  _array = responseData 
+						  construirDialogo($('#dialogEntidadLaboral'),'Entidad Laboral',_array); 
+					  }
+				  )				
+			}
+			mostrarDialogo($('#dialogEntidadLaboral'),$('#trEntidadLaboral a'), func);
+			
+			//imprrimir resumen
+			$("#imprimir").click(function(){
+				//window.open('/afiliado?opcion=imprimir&keyId={{ rsAfiliado.key() }}');
+				window.location.replace('/conversion?opcion=afiliadoDetalle&keyId={{ rsAfiliado.key() }}');
+			});
+		});
+	</script>
+	
+	<img src="static/print.png" alt="imprimir" height="50px;" style="margin-left: 90%;;" id="imprimir">
+	<h1>Afiliado  {{ rsAfiliado.usuario.primerNombre }} {{ rsAfiliado.usuario.primerApellido }}</h1><br>
+	<fieldset>
+		<legend>Datos Generales</legend>
+		<table>
+			<tr><td>Nombre: {{ rsAfiliado.usuario.primerNombre }} {{ rsAfiliado.usuario.segundoNombre }} 
+							{{ rsAfiliado.usuario.primerApellido }} {{ rsAfiliado.usuario.segundoApellido }}</td></tr>
+			<tr><td>Carnet: {{ rsAfiliado.carnet }}</td></tr>
+			<tr><td>Fecha de Afiliación: {{ rsAfiliado.fechaRegistro }}</td></tr>
+			<tr><td>Profesión: {{ rsAfiliado.categoriaProfesional }}</td></tr>
+			<tr><td>Lugar de estudios: {{ rsAfiliado.lugarDeEstudio }}</td></tr>
+			<tr><td>Estado Civil: {{ rsAfiliado.estadoCivil }}</td></tr>
+			<tr><td>Parentesco: {{ rsAfiliado.parentesco }}</td></tr>
+			<tr><td>Antiguedad Laboral: {{ rsAfiliado.antiguedadLaboral }} años</td></tr>
+			<tr><td>Nro Suscripción: {{ rsAfiliado.numeroSuscripcion }}</td></tr>
+			<tr><td>Categoria de Suscripción: {{ rsAfiliado.categoriaSuscripcion }}</td></tr>
+			<tr><td>Deuda: {{ rsAfiliado.deuda }}</td></tr>
+			<tr id="sedeLink"><td>Sede:
+			{% if rsAfiliado.sede %}
+				 <a href="/sede?opcion=detalles&keyId={{ rsAfiliado.sede.key() }}" id="{{ rsAfiliado.sede.key() }}">{{ rsAfiliado.sede.nombre }}</a>
+			{% else %}
+				<b>Aparentemente, la sede fue eliminada del sistema...</b> 
+			{% endif %}
+			</td></tr>
+		</table>
+	</fieldset>
+	{% if rsAfiliado.parentesco == 'TITULAR'%}
+	<fieldset>
+		<legend>Datos Laborales</legend>
+		{% if rsDatosLaborales %}
+			<table>
+				{% for dato in rsDatosLaborales %}
+					<tr><td>
+						<tr id="trEntidadLaboral"><td>Nombre:<a id="{{ dato.entidadLaboral.key() }}" href="/entidadLaboral?opcion=detalles&keyId={{ dato.entidadLaboral.key() }}"> {{ dato.entidadLaboral.nombre }} </a></td></tr>
+						<tr><td>Ocupación: {{ dato.ocupacion }}</td></tr>
+						<tr><td>Cargo: {{ dato.cargo }}</td></tr>
+						<tr><td>Tipo de Contrato: {{ dato.tipoContrato }}</td></tr>
+						<tr><td>Fecha de Ingreso: {{ dato.fechaDeIngreso }}</td></tr>
+						<tr><td>Departamento: {{ dato.departamento }}</td></tr>
+						<tr><td>Sueldo Base: {{ dato.sueldoBase }}</td></tr>
+						<tr><td>Tipo de Contrato: {{ dato.tipoContrato }}</td></tr>
+						<tr><td>Contacto: {{ dato.contacto }}</td></tr>
+					</td></tr>
+				{% endfor %}
+			</table>
+		{% else %}
+			Registrar nuevos datos laborales
+		{% endif %}
+	</fieldset>
+	{% endif %}
+	<fieldset>
+		<legend>Servicios</legend>
+		<div id="divServicios">
+			{% if rsAfiliadoServicio %}
+				{% for servicio in rsAfiliadoServicio %}
+					-<a href="/servicios?opcion=detalles?keyId={{ servicio.servicio.key() }}">{{ servicio.servicio.nombre }} </a><br>
+					 &nbsp;&nbsp;&nbsp;&nbsp;Estado: {{ servicio.estado }}<br>
+					 {% if servicio.observacion %}
+					 &nbsp;&nbsp;&nbsp;&nbsp;Obs: {{ servicio.observacion }}<br>
+					 {% endif %}
+				{% endfor %}
+			{% else %}
+				No posee servicios aun...<br>
+			{% endif %}
+		</div>
+		<a style="float:right;"  onclick="window.open('/servicioAfiliado?opcion=registrar&keyIdAfiliado={{ rsAfiliado.key() }}','_blank', 'scrollbars=1, height=400, width=500')">Vincular a nuevo servicio</a>
+	</fieldset>
+	<div id="dialogSede" title="Sede" style="display: none;"></div>
+	<div id="dialogEntidadLaboral" title="Entidad Laboral" style="display: none;"></div>
+{% endblock %}

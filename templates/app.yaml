@@ -1,0 +1,17 @@
+application: sigs-enlanube
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: false
+
+handlers:
+- url: /static
+  static_dir: static
+  
+- url: /.*
+  script: SIGS.py
+
+
+libraries:
+- name: jinja2
+  version: latest

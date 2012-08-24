@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>{% block title %}Sistema Integrado de Gestion Sindical{% endblock %}</title>
+<link href="/static/SIGS-styles.css" rel="stylesheet"
+			  type = "text/css" />
+<link type="text/css" href="static/jquery-ui-1.8.21.custom.css" rel="Stylesheet" />	
+<link type="text/css" href="static/jquery.noty.css" rel="Stylesheet" />
+<link type="text/css" href="static/noty_theme_default.css" rel="Stylesheet" />
+<!--  <link type="text/css" href="static/style.css" rel="Stylesheet" /> -->
+<link type="text/css" href="/static/jquery.dataTables.css" rel="Stylesheet" /> 
+<script src="/static/jquery-1.7.2.min.js"></script>
+<script src="/static/jquery-ui-1.8.21.custom.min.js"></script>
+<script src="/static/jquery.ui.datepicker-es.js"></script>
+<script src="/static/validator.js"></script>
+<script src="/static/jquery.noty.js"></script>
+<script src="/static/__jquery.tablesorter.min.js"></script>
+<script src="/static/jquery.dataTables.js"></script>
+
+</head>
+<body>
+<div id="contenedor">
+	<div id="cabecera">
+	{% if sindicatoActual.imagen %}
+		<td><img src='img?img_id={{ sindicatoActual.key() }}'></img></td>
+	{% else %}
+		<td><img src='static/no_image.jpeg' /></td>
+	{% endif %}
+	<div id="usuario_status">
+		<a href="/procesarPagina?opcion=autenticar&urlLinkText={{ url_linktext }}" >
+				{% if nombreUsuario %}
+					{{ nombreUsuario.user }}({{ url_linktext }})
+				{% else %}
+					{{ url_linktext }}
+				{% endif %}
+		</a>
+	</div>
+	</div>
+	<div id="container_columnas">
+		<div id="columna1">
+			<div id="navcontainer">
+				<ul id="navlist">
+					<li id="active"><a href="/sindicato?opcion=tomgreen" id="current">Sindicatos</a></li>
+					{% if sindicatoActual %}
+						<li><a href="/sindicato?opcion=detalles&keyId={{ sindicatoActual.key() }}">{{ sindicatoActual.nombre }}</a></li>
+						<div id="gato" style="margin-left:20px;">
+						   <li><a href="/sede">Sedes</a></li>
+						   <li><a href="/servicio">Servicios</a></li>
+						   <li><a href="/entidadConvenio">Entidad Convenio</a></li>
+						   <li><a href="/lugarPrestacionServicio">Lugar Prestacion Servicio</a></li>
+						   <li><a href="/afiliado">Afiliados</a></li>
+						   <li><a href="/accesoServicios?opcion=showmedo">Contabilidad</a></li>
+						</div>
+					{% endif %}
+					
+				</ul>
+			</div>
+		</div>
+		<div id = "bodycontent">
+			<div id="columna2">
+				{% block bodycontent %}
+					
+				{% endblock %}
+			</div>
+		</div>
+	</div>
+	<div id="pie">
+		<p>SIGS.appspot.com</p>
+		<p>2011-2012</p>
+	</div>
+</div>
+</body>
+</html> 

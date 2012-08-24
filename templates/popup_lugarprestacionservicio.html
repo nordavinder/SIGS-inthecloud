@@ -1,0 +1,159 @@
+{% extends "_base_popup.html" %}
+{% block title %}
+	SIGS.:.Nueva Entidad Convenio
+{% endblock %}
+{% block bodycontent %}
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$("#selectDireccion").hide();
+				$("#tablaDireccion").hide();
+				$("#txtNombreLugar").attr("readonly",true);
+				$("#txtTelefonoLugar").attr("readonly",true);
+				$("input[type=radio]").click(function(){
+					if($(this).val() == 'S'){
+						$("#selectDireccion").show();
+						$("#tablaDireccion").hide();
+						$("#txtNombreLugar").attr("readonly",true);
+						$("#txtTelefonoLugar").attr("readonly",true);
+					}else{
+						$("#tablaDireccion").show();
+						$("#selectDireccion").hide();
+						$("#txtNombreLugar").attr("readonly",false);
+						$("#txtTelefonoLugar").attr("readonly",false);
+					}
+						$("#txtNombreLugar").val("");
+						$("#txtTelefonoLugar").val("");
+						$("#txtObservaciones").val("");
+						$("#txtObservacionesLugar").val("");
+				});
+				
+				$("#selectDireccion").change(function(){
+					$("select option:selected").each(function(){
+						if($(this).index() != 0){
+							valorKeyId = $(this).val()
+							$.getJSON("/ajaxRequest?opcion=obtenerSedeKeyId",{keyId:valorKeyId}, function(data){
+								$("#txtNombreLugar").val(data.nombre);
+								$("#txtTelefonoLugar").val(data.telefono);	
+								$("#txtObservacionesLugar").val(data.descripcion);
+							});
+						}
+						
+					});
+				});
+				
+				//procesamiento Ajax 
+				$('#formRegistro').submit(function(){
+					nombre = $('input[name=nombre]').val()
+		            telefono = $('input[name=telefono]').val()
+		            txtObservaciones = $('textarea[name=txtObservaciones]').val()
+		            radioDireccion = $('input[name=radioDireccion]:checked').val()
+		            selectDireccionSede = $('select[name=selectDireccionSede]').val()
+		            numeroCalle = $('input[name=numeroCalle]').val()
+		            provincia = $('input[name=provincia]').val()
+					localidad = $('input[name=localidad]').val()
+		            codigoPostal = $('input[name=codigoPostal]').val()
+					btnConfirmarRegistroAjax = $('input[name=btnConfirmarRegistroAjax]').val()
+					
+		            dataString = 'nombre='+nombre+'&telefono='+telefono+'&txtObservaciones='+txtObservaciones+
+		            			 '&radioDireccion='+radioDireccion+'&selectDireccionSede='+selectDireccionSede+
+		            			 '&numeroCalle='+numeroCalle+'&provincia='+provincia+'&localidad='+localidad+
+		            			 '&codigoPostal='+codigoPostal+'&btnConfirmarRegistroAjax='+btnConfirmarRegistroAjax;
+					
+					$.ajax({
+						type:"POST",
+						url:"/lugarPrestacionServicio",
+						data: dataString,
+						dataType:"json",
+						success: function(responseData){
+							newSelect = $('<select name="selectLugarPrestacionServicio" id="selectLugarPrestacionServicio">');
+							newSelect.append('<option value="nuevoLugarPrestacionServicio">Registrar Nueva Entidad</option>');
+							$.each(responseData, function(index, itemData){
+								if(nombre == responseData[index].nombre){
+									newSelect.append('<option value="'+responseData[index].keyId+'" selected="selected">'+responseData[index].nombre+' - '+responseData[index].nombreCalle+' '+responseData[index].numeroCalle+'</option>');
+								}else{
+									newSelect.append('<option value="'+responseData[index].keyId+'">'+responseData[index].nombre+' - '+responseData[index].nombreCalle+' '+responseData[index].numeroCalle+'</option>');
+								}
+							});
+							newSelect.append('</select>');
+							window.opener.jQuery('#selectLugarPrestacionServicio').replaceWith(newSelect);
+							window.close();
+							window.opener.invokeSuccessNotification('El lugar de prestacion de servicio '+nombre+' fue agregado con exito');
+						}
+					});
+					return false;
+				});
+			})
+		</script>
+	<div id="stylized" class="myform">
+		<form  method="post" action="/lugarPrestacionServicio" id='formRegistro'  >
+			<h1>Lugar de Prestacion de Servicios</h1>
+			<p>Registra un nuevo lugar</p>
+			<fieldset>
+					<label>Es una sede del sindicato?
+						<span class="small">SI-NO</span>
+					</label>
+					<input type="radio" name="radioDireccion" value="S">
+				 	<input type="radio" name="radioDireccion" value="N">
+				 	<div class="spacer"></div>
+				<div id="tablaDireccion">
+					<h1>Direccion</h1>
+					<p>Ingresa la direccion</p>
+					
+					<label>Calle (*)
+					<span class="small">Ingresa una calle</span>
+					</label>
+					<input type="text" name="calle"/>
+					
+					<label>Numero (*)
+					<span class="small">Ingresa un numero de calle</span>
+					</label>
+					<input type="text" name="numeroCalle"/>
+					
+					<label>Provincia (*)
+					<span class="small">Ingresa una provincia</span>
+					</label>
+					<input type="text" name="provincia"/>
+					
+					<label>Localidad (*)
+					<span class="small">Ingresa una localidad</span>
+					</label>
+					<input type="text" name="localidad"/>
+					
+					<label>C.P (*)
+					<span class="small">Ingresa un codigo postal</span>
+					</label>
+					<input type="text" name="codigoPostal"/>
+				</div>
+				<div id="selectDireccion">
+					<select name="selectDireccionSede" id="selectDireccionSede">
+						<option value="nuevaSede">Cargar nueva Sede...</option>
+						{% if listaSedes %}
+							{% for sede in listaSedes %}
+								<option value="{{ sede.key() }}">{{ sede.nombre }} - {{sede.direccion.calle}} {{sede.direccion.numeroCalle}}  </option>
+							{% endfor %}
+						{% endif %}
+					</select>
+				</div>
+		    </fieldset>
+		    
+			<label>Nombre (*)
+			<span class="small">Ingresa un nombre</span>
+			</label>
+			<input type="text" name="nombre" id="txtNombreLugar" />
+			
+			<label>Telefono (*)
+			<span class="small">Ingresa un telefono</span>
+			</label>
+			<input type="text" name="telefono" id="txtTelefonoLugar" />
+			
+			<label>Observaciones (*)
+			<span class="small">Ingresa algunas observaciones del lugar</span>
+			</label>
+			<textarea name="txtObservaciones" id="txtObservacionesLugar" rows = "5" cols="35" ></textarea>
+		    
+			<div class="spacer"></div>
+			
+			<input type="submit" value="Registrar" class="button-class" name="btnConfirmarRegistroAjax"/>
+		</form>
+	</div>
+{% endblock %}

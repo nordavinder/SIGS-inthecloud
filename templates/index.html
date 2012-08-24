@@ -1,0 +1,36 @@
+{% extends "_base.html" %}
+{% block title %}
+	SIGS (beta).:.Inicio
+{% endblock %}
+{% block bodycontent %}
+	<script>
+		$(document).ready(function(){
+			notifMsg = $('input[name=notifMsg]')
+			if($(notifMsg).length)
+				noty({force: true, timeout: false, text: $(notifMsg).val(), type: 'information'});
+		 });
+	</script>
+	{% if notifMsg %}
+		<input type="hidden" name="notifMsg" value="{{ notifMsg }}" >
+	{% endif %}
+	{% if nombreUsuario %}
+		Hola <b>{{ nombreUsuario.nombre }}</b>!<br>
+		{% if listaSindicatos %}
+			Estos son tus sindicatos:<br>
+			{% for sindicato in listaSindicatos %}
+				<a href='/'>{{ sindicato.nombre }}</a>
+				<br>
+				<div style="margin-left:40px;">-{{ sindicato.descripcion }}</div>
+			{% endfor %}
+		{% else %}
+			No tiene sindicatos registrados. Registre un sindicato para comenzar a interactuar con el sistema<br><br>
+			<input type="button" name="btnRegistarSindicato" value="Registrar Sindicato" onclick="window.location='/sindicato?opcion=registrar'" class='button-class'>
+		{% endif %}
+	{% else %}
+		Registrate en el sistema en la nube de gestion para organizaciones sindicales  
+		<br><br><!-- espera nomas guacho -->
+		<input type="button" name="btnRegistro"  style="height: 25px; width: 200px"  value="Registrar" onclick="window.location='/procesarPagina?opcion=autenticar&urlLinkText=login'" class='button-class'>
+	{% endif %}
+	<div style="text-align: center; margin-top: 90px;">
+	</div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "_base.html" %}
+{% block title %}
+	SIGS.:.Afiliados
+{% endblock %}
+{% block bodycontent %}
+	<script type="text/javascript">
+		$(document).ready(function(){
+			initSimpleTableSorter($("#myTable"));
+			notifMsg = $('input[name=notifMsg]')
+			if($(notifMsg).length)
+				noty({force: true, timeout: false, text: $(notifMsg).val(), type: 'information'});
+			
+			$('input[name=btnServicioOtorgar]').click(function(){
+				usuarioRadio = $('input[name=radioAfiliados]:checked').val()
+				window.open('/valeServicio?opcion=registrar&keyIdAfiliado='+usuarioRadio,'_blank','scrollbars=1, height=700, width=750')
+				return false;
+			});
+			
+			var f = function outterFunction(element){
+				keyId = $(element).attr("id");
+				  $.getJSON(
+					  "/afiliado",
+					  {keyId : keyId, opcion : 'afiliadoJSON'}, 
+			  		  function(responseData){
+						  _array = ['Nombre: '+responseData.nombre,'Carnet: '+responseData.carnet,'Parentesco: '+responseData.parentesco,'Deuda: '+responseData.deuda] 
+						  construirDialogo($('#dialog'),'Afiliado',_array); 
+					  }
+				  )				
+			}
+			mostrarDialogo($('#dialog'),$('#tdAfiliados a'), f);
+		});		
+
+	</script>
+	
+	<h1>Lista de Afiliados</h1>
+	{% if notifMsg %}
+		<input type="hidden" name="notifMsg" value="{{ notifMsg }}" >
+	{% endif %}
+	<table id="myTable">
+	  {% if listaAfiliados %}
+	  <thead>
+		    <tr>
+		  	  <th></th>
+		      <th>Nombre</th>
+			  <th>Direccion</th>
+			  <th>Telefono</th>
+			  <th>Carnet</th>
+		      <th>Parentesco</th>
+		      <th>Deuda</th>
+		      <th>Sede</th>
+		    </tr>
+	    </thead>
+	    <tbody>
+		  	<form method="post" action="/afiliado" id="formAfiliado">
+				{% for afiliado in listaAfiliados %}
+					<tr>
+						<td><input type="radio" name="radioAfiliados" value="{{ afiliado.key() }}"></td>
+						<td id="tdAfiliados"><a href="/afiliado?opcion=detalles&keyId={{ afiliado.key() }}" id="{{ afiliado.key() }}">{{ afiliado.usuario.primerNombre }} {{ afiliado.usuario.primerApellido }}</a></td>
+					    <td>{{ afiliado.usuario.direccion.calle }} {{ afiliado.usuario.direccion.numeroCalle }}</td>
+					    <td>{{ afiliado.usuario.telefono }}</td>
+					    <td>{{ afiliado.carnet }}</td>
+					    <td>{{ afiliado.parentesco }}</td>
+					    <td>{{ afiliado.deuda }}</td>
+					    {% if  afiliado.sede  %}
+					    	<td><a href="/sede?opcion=detalles&keyId={{ afiliado.sede.key() }}">{{ afiliado.sede.nombre }}</a></td>
+					    {% else %}
+						    <td>{{ afiliado.sede.nombre }}</td>
+					    {% endif %}
+			     	</tr>
+				{% endfor %}
+		</tbody>
+			<br>
+			<input type="submit" value="Eliminar" name = "btnEliminar" style="width: 150px;" class='button-class'>
+			<input type="submit" value="Modificar" name = "btnModificar" style="width: 150px;margin-left: 10px;" class='button-class'>
+			<input type="submit" value="Otorgar Servicio" name = "btnServicioOtorgar" style="width: 150px;margin-left: 10px;" class='button-class'>
+		</form>
+	  {% else %}
+	  	<br>El sindicato no tiene afiliados vinculados.<br><br>
+	  	<a href = '/afiliado?opcion=registrar'>Click para vincular afiliados al sindicato.</a> 
+	  {% endif %}  
+	</table><br>
+	<input type="button" name="btnRegistro" value="Registrar" style="width: 150px;" onclick="window.location='/afiliado?opcion=registrar'" class='button-class'>
+	<div id="dialog" title="Afiliado" style="display: none;"></div>
+{% endblock %}

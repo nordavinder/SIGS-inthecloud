@@ -1,0 +1,160 @@
+<html>
+	<head>
+		<style type="text/css">
+						.features-table
+			{
+			  width: 100%;
+			  margin: 0 auto;
+			  border-collapse: separate;
+			  border-spacing: 0;
+			  text-shadow: 0 1px 0 #fff;
+			  color: #2a2a2a;
+			  background: #fafafa;  
+			  background-image: -moz-linear-gradient(top, #fff, #eaeaea, #fff); /* Firefox 3.6 */
+			  background-image: -webkit-gradient(linear,center bottom,center top,from(#fff),color-stop(0.5, #eaeaea),to(#fff)); 
+			}
+			
+			.features-table td
+			{
+			  height: 50px;
+			  line-height: 50px;
+			  padding: 0 20px;
+			  border-bottom: 1px solid #cdcdcd;
+			  box-shadow: 0 1px 0 white;
+			  -moz-box-shadow: 0 1px 0 white;
+			  -webkit-box-shadow: 0 1px 0 white;
+			  white-space: nowrap;
+			  text-align: center;
+			}
+			
+			/*Body*/
+			.features-table tbody td
+			{
+			  text-align: center;
+			  font: normal 12px Verdana, Arial, Helvetica;
+			  width: 150px;
+			}
+			
+			.features-table tbody td:first-child
+			{
+			  width: auto;
+			  text-align: left;
+			}
+			
+			.features-table td:nth-child(2), .features-table td:nth-child(3)
+			{
+			  background: #efefef;
+			  background: rgba(144,144,144,0.15);
+			  border-right: 1px solid white;
+			}
+			
+			
+			.features-table td:nth-child(4)
+			{
+			  background: #e7f3d4;  
+			  background: rgba(184,243,85,0.3);
+			}
+			
+			/*Header*/
+			.features-table thead td
+			{
+			  font: bold 1.3em 'trebuchet MS', 'Lucida Sans', Arial;  
+			  -moz-border-radius-topright: 10px;
+			  -moz-border-radius-topleft: 10px; 
+			  border-top-right-radius: 10px;
+			  border-top-left-radius: 10px;
+			  border-top: 1px solid #eaeaea; 
+			}
+			
+			.features-table thead td:first-child
+			{
+			  border-top: none;
+			}
+			
+			/*Footer*/
+			.features-table tfoot td
+			{
+			  font: bold 1.4em Georgia;  
+			  -moz-border-radius-bottomright: 10px;
+			  -moz-border-radius-bottomleft: 10px; 
+			  border-bottom-right-radius: 10px;
+			  border-bottom-left-radius: 10px;
+			  border-bottom: 1px solid #dadada;
+			}
+			
+			.features-table tfoot td:first-child
+			{
+			  border-bottom: none;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Afiliado  {{ rsAfiliado.usuario.primerNombre }} {{ rsAfiliado.usuario.primerApellido }}</h1><br>
+		<fieldset>
+			<legend>Datos Generales</legend>
+			<table class="features-table">
+				<tbody>
+					<tr><td>Nombre: {{ rsAfiliado.usuario.primerNombre }} {{ rsAfiliado.usuario.segundoNombre }} 
+									{{ rsAfiliado.usuario.primerApellido }} {{ rsAfiliado.usuario.segundoApellido }}</td></tr>
+					<tr><td>Carnet: {{ rsAfiliado.carnet }}</td></tr>
+					<tr><td>Fecha de Afiliación: {{ rsAfiliado.fechaRegistro }}</td></tr>
+					<tr><td>Profesión: {{ rsAfiliado.categoriaProfesional }}</td></tr>
+					<tr><td>Lugar de estudios: {{ rsAfiliado.lugarDeEstudio }}</td></tr>
+					<tr><td>Estado Civil: {{ rsAfiliado.estadoCivil }}</td></tr>
+					<tr><td>Parentesco: {{ rsAfiliado.parentesco }}</td></tr>
+					<tr><td>Antiguedad Laboral: {{ rsAfiliado.antiguedadLaboral }} años</td></tr>
+					<tr><td>Nro Suscripción: {{ rsAfiliado.numeroSuscripcion }}</td></tr>
+					<tr><td>Categoria de Suscripción: {{ rsAfiliado.categoriaSuscripcion }}</td></tr>
+					<tr><td>Deuda: {{ rsAfiliado.deuda }}</td></tr>
+					<tr id="sedeLink"><td>Sede:
+					{% if rsAfiliado.sede %}
+						 <a href="/sede?opcion=detalles&keyId={{ rsAfiliado.sede.key() }}" id="{{ rsAfiliado.sede.key() }}">{{ rsAfiliado.sede.nombre }}</a>
+					{% else %}
+						<b>Aparentemente, la sede fue eliminada del sistema...</b> 
+					{% endif %}
+					</td></tr>
+				</tbody>
+			</table>
+		</fieldset>
+		{% if rsAfiliado.parentesco == 'TITULAR'%}
+		<fieldset>
+			<legend>Datos Laborales</legend>
+			{% if rsDatosLaborales %}
+				<table>
+					{% for dato in rsDatosLaborales %}
+						<tr><td>
+							<tr id="trEntidadLaboral"><td>Nombre:<a id="{{ dato.entidadLaboral.key() }}" href="/entidadLaboral?opcion=detalles&keyId={{ dato.entidadLaboral.key() }}"> {{ dato.entidadLaboral.nombre }} </a></td></tr>
+							<tr><td>Ocupación: {{ dato.ocupacion }}</td></tr>
+							<tr><td>Cargo: {{ dato.cargo }}</td></tr>
+							<tr><td>Tipo de Contrato: {{ dato.tipoContrato }}</td></tr>
+							<tr><td>Fecha de Ingreso: {{ dato.fechaDeIngreso }}</td></tr>
+							<tr><td>Departamento: {{ dato.departamento }}</td></tr>
+							<tr><td>Sueldo Base: {{ dato.sueldoBase }}</td></tr>
+							<tr><td>Tipo de Contrato: {{ dato.tipoContrato }}</td></tr>
+							<tr><td>Contacto: {{ dato.contacto }}</td></tr>
+						</td></tr>
+					{% endfor %}
+				</table>
+			{% else %}
+				Registrar nuevos datos laborales
+			{% endif %}
+		</fieldset>
+		{% endif %}
+		<fieldset>
+			<legend>Servicios</legend>
+			<div id="divServicios">
+				{% if rsAfiliadoServicio %}
+					{% for servicio in rsAfiliadoServicio %}
+						-<a href="/servicios?opcion=detalles?keyId={{ servicio.servicio.key() }}">{{ servicio.servicio.nombre }} </a><br>
+						 &nbsp;&nbsp;&nbsp;&nbsp;Estado: {{ servicio.estado }}<br>
+						 {% if servicio.observacion %}
+						 &nbsp;&nbsp;&nbsp;&nbsp;Obs: {{ servicio.observacion }}<br>
+						 {% endif %}
+					{% endfor %}
+				{% else %}
+					No posee servicios aun...<br>
+				{% endif %}
+			</div>
+		</fieldset>	
+	</body>
+ </html>

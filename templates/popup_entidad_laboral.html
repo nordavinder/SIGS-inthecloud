@@ -1,0 +1,145 @@
+{% extends "_base_popup.html" %}
+{% block title %}
+	SIGS.:.Nuevo Usuario
+{% endblock %}
+{% block bodycontent %}
+	<script type="text/javascript">
+	$(document).ready(function(){		
+		//esto va a deshabilitar el txtfield txtTipoEmpresa en caso de que se seleccione el 
+		//combo 'Otra'
+		$('input[type=radio]').click(function(){
+			if($(this).attr('id')){ //se comprueba que el elemento tenga el atributo id seteado
+				$('#txtTipoEmpresa').prop("disabled",false);	
+			}else{
+				$('#txtTipoEmpresa').prop("disabled",true);
+			}	
+		});
+		
+		$('#entidadLaboralForm').submit(function(){
+			nombre = $('input[name="nombre"]').val()
+		    tipoDeEmpresa = $('input[name="radioTipoEmpresa"]:checked').val()
+		    telefonoEmpresa = $('input[name="telefonoEmpresa"]').val()
+		    cuitEmpleador = $('input[name="cuitEmpleador"]').val()
+		    numeroSeguridadSocial = $('input[name="numeroSeguridadSocial"]').val()
+		    
+		    //datos Direccion 
+		    calle = $('input[name="calle"]').val()
+            numeroCalle = $('input[name="numeroCalle"]').val()
+            provincia = $('input[name="provincia"]').val()
+            localidad = $('input[name="localidad"]').val()
+            codigoPostal = $('input[name="codigoPostal"]').val()
+            
+            btnConfirmarRegistroAjax = $('input[name="btnConfirmarRegistroAjax"]').val()
+			
+            dataString = 'nombre='+nombre+'&tipoDeEmpresa='+tipoDeEmpresa+'&telefonoEmpresa='+telefonoEmpresa+
+            			'&cuitEmpleador='+cuitEmpleador+'&numeroSeguridadSocial='+numeroSeguridadSocial+
+            			'&calle='+calle+'&numeroCalle='+numeroCalle+'&provincia='+provincia+
+            			'&localidad='+localidad+'&codigoPostal='+codigoPostal+'&btnConfirmarRegistroAjax='+btnConfirmarRegistroAjax;
+			
+			$.ajax({
+				type: "POST",
+				url:"/entidadLaboral",
+				data:dataString,
+				dataType:"json",
+				success: function(responseData){
+					newSelect = $('<select name="selectEntidadLaboral" id="selectEntidadLaboral">');
+					newSelect.append('<option value="nuevaEntidadLaboral">Cargar nueva empresa...</option>');
+					$.each(responseData, function(index, itemData){
+						if (nombre == responseData[index].nombre){
+							newSelect.append('<option value="'+responseData[index].keyId+'" selected="selected">'+responseData[index].nombre+'</option>');
+						}else{
+							newSelect.append('<option value="'+responseData[index].keyId+'">'+responseData[index].nombre+'</option>');
+						}
+							
+					});
+					newSelect.append('</select>');
+					window.opener.jQuery('#selectEntidadLaboral').replaceWith(newSelect);
+					window.close();
+					window.opener.invokeSuccessNotification('La entidad laboral '+nombre+' fue agregada con exito');
+				}
+			})
+			
+			return false;
+		});
+		
+	});
+	
+</script>
+	<div id="pop"  style="display:none;"></div>
+		<div id="stylized" class="myform">
+			<form  method="post" action="/entidadLaboral" name='formRegistro' id="entidadLaboralForm">
+				<h1>Entidad Laboral</h1>
+				<p>Registrar nueva Entidad Laboral</p>		
+				<label>Nombre (*)
+				<span class="small">Agrega el nombre</span>
+				</label>
+				<input type="text" name="nombre"/>
+				
+				<label>Telefono 
+				<span class="small">Agrega el telefono</span>
+				</label>
+				<input type="text" name="telefonoEmpresa"/>
+				
+				<label>CUIT 
+				<span class="small">Cuit del Empledor:</span>
+				</label>
+				<input type="text" name="cuitEmpleador"/>
+				
+				<label>Nro Seguridad Social
+				<span class="small">Ingresa el Nro Seguridad Social</span>
+				</label>
+				<input type="text" name="numeroSeguridadSocial" />
+				<div class="spacer"></div>
+				<fieldset>
+					<h1>Tipo de Empresa</h1>
+					<p>Indica el tipo de empresa del afiliado</p>
+					
+					<label>Privada</label>
+					<input type="radio" name="radioTipoEmpresa" value="Privada">
+					
+					
+					<label>Funcion Publica</label>
+					<input type="radio" name="radioTipoEmpresa" value="Funcion Publica">
+					 
+					<label>Asociación</label>
+					<input type="radio" name="radioTipoEmpresa" value="Asociacion">
+					
+					<label>Autonoma</label>
+					<input type="radio" name="radioTipoEmpresa" value="Autonoma">
+					
+					<label>Otra</label>
+					<input type="radio" name="radioTipoEmpresa" id="otroTipoEmpresa" value="Otra">
+					<input type="text" name="txtTipoEmpresa" id="txtTipoEmpresa" disabled="disabled">
+				</fieldset>
+				<fieldset >
+					<h1>Direccion</h1>
+					<p>Completa los datos de la direccion del usuario</p>
+					<label>Calle (*)
+					<span class="small">El nombre de la calle</span>
+					</label>
+					<input type="text" name="calle"/>
+					
+					<label>Numero (*)
+					<span class="small">El nombre de la calle</span>
+					</label>
+					<input type="text" name="numeroCalle"/>
+					
+					<label>Provincia (*)
+					<span class="small">El nombre de la calle</span>
+					</label>
+					<input type="text" name="provincia"/>
+					
+					<label>Localidad (*)
+					<span class="small">El nombre de la calle</span>
+					</label>
+					<input type="text" name="localidad"/>
+					
+					<label>C.P
+					<span class="small">El nombre de la calle</span>
+					</label>
+					<input type="text" name="codigoPostal"/>
+				</fieldset>
+				<input type="submit" value="Registrar" class="button-class" name="btnConfirmarRegistroAjax"/>
+			</form>
+		</div>
+{% endblock %}

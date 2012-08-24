@@ -1,0 +1,73 @@
+{% extends "_base.html" %}
+{% block title %}
+	SIGS (beta).:.Inicio
+{% endblock %}
+{% block bodycontent %}
+	<script>
+		$(document).ready(function(){
+			initSimpleTableSorter($("#myTable"));
+			notifMsg = $('input[name=notifMsg]')
+			if($(notifMsg).length)
+				noty({force: true, timeout: false, text: $(notifMsg).val(), type: 'information'});
+			
+			
+			$('#imprimir').click(function(){
+				$("#iconosImpresion").show("slow");
+			});
+			
+			$("#impresionHTML").click(function(){
+				window.open('/accesoServicios?opcion=historialToHtml&anho={{ anho }}&mes={{ mesString }}');
+			});
+			
+			$("#impresionPDF").click(function(){
+				window.open('/conversion?opcion=historialToPdf&anho={{ anho }}&mes={{ mesString }}');
+				
+			});
+			
+			$("#impresionXLS").click(function(){
+				window.open('http://www.zamzar.com/manage/');
+			});
+			
+		 });
+	</script>
+	<h1>Planilla de descuentos - {{ mesString }} / {{ anho }}</h1>
+	<div id="iconosImpresion" hidden="hidden">
+		<p>Seleccione el formato de impresion</p>
+		<img src="static/html.png" alt="mostrar-menos" height="50px;"  id="impresionHTML">
+		<img src="static/pdf.png" alt="mostrar-menos" height="50px;"  id="impresionPDF">
+		<img src="static/png.png" alt="mostrar-menos" height="50px;"  id="impresionPNG">
+		<img src="static/doc.png" alt="mostrar-menos" height="50px;"  id="impresionDOC">
+		<img src="static/xls.png" alt="mostrar-menos" height="50px;"  id="impresionXLS">
+	</div>
+	<div style="padding-right: 35px;padding-bottom: 50px;">
+	<img src="static/print.png" alt="imprimir" height="50px;" style="float: right;" id="imprimir">
+	</div>
+	{% if  rsAccesoServicio %}
+	<table id="myTable">
+	    <tr>
+	      <th>Recibo Sueldo</th>
+		  <th>Apellido y Nombre</th>
+		  <th>Nro Autorizacion</th>
+		  <th>Servicio</th>
+		  <th>Nro de Cuotas Pagadas</th>
+		  <th>Monto a descontar</th>
+	    </tr>
+		{% for accesoServicio in rsAccesoServicio %}
+			<tr>
+				<td>{{ accesoServicio.vale.reciboSueldoNro }}</td>
+				<td>{{ accesoServicio.afiliado.usuario.primerApellido }} {{ accesoServicio.afiliado.usuario.segundoApellido }}, {{ accesoServicio.afiliado.usuario.primerNombre }} {{ accesoServicio.afiliado.usuario.segundoNombre }}</td>
+			    <td>{{ accesoServicio.vale.numeroAutorizacion }}</td>
+			    <td>{{ accesoServicio.vale.servicio.nombre }}</td>
+			    <td>{{ accesoServicio.cuotaPagada }}</td>
+			    <td>{{ accesoServicio.montoAbonado }}</td>
+	     	 </tr>
+		{% endfor %}
+	 	<tr>
+	 		<td><b>Total</b></td>
+	 		<td colspan="6"><input type="text" style="float: right; text-align: right;" value="{{ totalPagosMesActual }}" readonly="readonly" name="txtMontoTotal"/>
+	 	</tr>
+	 </table>
+	 {% else %}
+	 	No se registraron movimientos para este mes...
+	{% endif %}
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "_base.html" %}
+{% block title %}
+	SIGS.:.Registrar Servicio
+{% endblock %}
+{% block bodycontent %}
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("#selectUsuarioEncargado").change(function(){
+			if($(this).prop("selectedIndex") == 0){
+				window.open('popup_usuario_registrar.html', '_blank', 'scrollbars=1, height=600, width=600');
+			}
+		});
+		
+		$('form[name=formRegistro]').submit(function(){
+			var array = [
+						 validarCampoTexto($('input[name=nombre]'), 'Ingrese un nombre valido', 'string'),
+						 validarCampoTexto($('textarea[name=txtDescripcion]'), 'Ingrese una descripcion valida', 'string')
+			             ]
+
+			if (!validateArray(array, 'error', 'Verifique los campos invalidos...', false, 'top')){
+				return false;
+			}
+
+			
+			
+			dataString = $(this).serialize();
+			$.ajax({
+				type:'POST',
+				url:'/servicio',
+				data:dataString+'&btnConfirmarRegistro=btnConfirmarRegistro',
+				dataType:'json',
+				success:function(responseData){
+					validateElementFromJsonResponse("OK", responseData.nombre, $('input[name=nombre]'));
+					validateElementFromJsonResponse("OK", responseData.descripcion, $('textarea[name=txtDescripcion]'));
+					if (responseData.responseStatus == "OK"){
+						window.location.replace('/servicio?opcion=index&msgCode=75&txt='+$('input[name=nombre]').val());
+					}else{
+						noty({force: true, timeout: false, text: responseData.errorMessage, type: 'error'});
+					}
+				}
+					
+			});
+			return false;
+		});	
+		
+	});
+</script>
+	{% if mensajeInformacion %}
+		<h3>{{ mensajeInformacion }}</h3> <br>
+	{% endif %}
+	<h2>Registrar Servicio</h2>
+	<form  method="post"  name='formRegistro'>
+		<table id="one-column-emphasis">
+			<tr><td>Nombre (*):</td> <td><input type="text" name="nombre"/></td></tr>
+			<tr><td>Descripcion (*):</td> <td> <textarea name="txtDescripcion" rows = "5" cols="40" ></textarea></td></tr>
+			<tr><td>Observaciones:</td> <td> <textarea name="txtObservaciones" rows = "5" cols="40" >Registra bases y condiciones para acceder al servicio, etc.</textarea></td></tr>
+			<tr><td>Codigo de Descuento:</td> <td><input type="text" name="codigoDescuento"/></td></tr>
+		</table>
+		<input type="submit" value="Registrar" style="width: 150px;" class="button-class" name="btnConfirmarRegistro"/>
+		<input type="submit" value="Cancelar" 
+			onclick="window.location='/servicio'; return false;" style="width: 150px;" class="button-class"/>
+	</form>
+{% endblock %}

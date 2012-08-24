@@ -1,0 +1,48 @@
+{% extends "_base.html" %}
+{% block title %}
+	SIGS.:.Servicio {{ rsServicio.nombre }}
+{% endblock %}
+{% block bodycontent %}
+	<script type="text/javascript">
+		$(document).ready(function(){
+			notifMsg = $('input[name=notifMsg]')
+			if($(notifMsg).length)
+				noty({force: true, timeout: false, text: $(notifMsg).val(), type: 'information'});
+		 });
+	</script>
+	<h1>Servicio  {{ rsServicio.nombre }} </h1>
+	{% if notifMsg %}
+		<input type="hidden" name="notifMsg" value="{{ notifMsg }}" >
+	{% endif %}
+	<br>
+	<b>Una breve Descripcion:</b><br> <p>{{ rsServicio.descripcion }}</p>
+	
+	<br>
+		<b>Observaciones:</b><br> <p>{{ rsServicio.observaciones }}</p>
+	<br>
+	<fieldset>
+	<legend><b>Entidades prestadoras del servicio</b></legend>
+			<div style="padding-left:20px;">
+				{% if listaEntidadLugares %}
+					{% for entidadLugar in listaEntidadLugares %}
+						<ul>
+							<li><a href="#">{{ entidadLugar.entidadConvenio.nombre}} </a> <br>
+							 {{ entidadLugar.entidadConvenio.descripcion}} </li>
+							<b>Fecha Inicio: {{ entidadLugar.entidadConvenio.fechaCreacion.strftime('%d-%m-%Y') }}</b>
+							<b>Fecha Fin: {{ entidadLugar.entidadConvenio.fechaExpiracion.strftime('%d-%m-%Y') }}</b>
+							<br><b>Lugar de Prestacion del Servicio: 
+								{% for lugar in entidadLugar.lugaresPrestacionServicio %}
+									<div style="padding-left:20px;"></b><a href="#">{{ lugar.nombre }} </a> - {{ lugar.direccion.calle }} {{ lugar.direccion.numeroCalle }}</div>
+								{% endfor %}
+							<br>
+						</ul>
+					{% endfor %}
+				{%  else %}
+					<h4>--Aun no existen vinculos entre los servicios y las entidades convenio...</h4><br>
+				{% endif %}
+				<div style="float:right;padding-right:20px;">
+					<input type="button" name="btnRegistro" value="Agregar" style="width: 150px;" onclick="window.location='/servicioEntidadConvenio?opcion=registrar&servicioKeyId={{ rsServicio.key() }}'" class='button-class'>
+				</div>
+			</div>
+	</fieldset>
+{% endblock %}

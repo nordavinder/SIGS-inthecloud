@@ -1,0 +1,137 @@
+TODO: 
+-Agregar las opciones de:
+	-registrar servicio desde el formulario. Hacer que ande  el sistemita de la persona Referencia.
+	-ABM/lista: cargar Lugar Prestacion Servicio.
+	-ABM/lista: cargar Convenio Empresa Servicio. Referencia: ServicioEntidadConvenio
+  
+-Agregar validaciones jQuery
+-Agregar restricciones DB. Por ejemplo, que no se asignen dos mismos
+lugares de prestacion de servicios a un servicio
+-arreglar el disenho de los popup
+-hacer que registrar servicio entidad vonvenio sea un popup
+
+
+Modelo
+Agregar la restriccion del unique, en el metodo de insercion
+	_key_name = pNombre + pApellido
+    _obj = AdminUser.get_by_key_name(_key_name)
+    if _obj:
+        raise SIGSException('Ya existe un usuario registrado con esos datos...')
+    rsUsuario = AdminUser(key_name = _key_name, user = getCurrentUser(), nombre = pNombre, apellido = pApellido)
+    rsUsuario.put()
+    
+    
+Vista:
+$(document).ready(function(){
+		$('form[name=formRegistro]').submit(function(){
+			nombre = $('input[name=nombre]')
+			apellido = $('input[name=apellido]')
+			opcion = $('input[name=opcion]').val()
+			
+			dataString = 'nombre='+$(nombre).val()+'&apellido='+
+						  $(apellido).val()+'&opcion='+opcion;
+			$.ajax({
+				type:'POST',
+				url:'/registro',
+				data:dataString,
+				dataType:'json',
+				success:function(responseData){
+					validateElementFromJsonResponse("OK", responseData.nombre, $(nombre), $(nombre).val());
+					validateElementFromJsonResponse("OK", responseData.apellido, $(apellido), $(apellido).val());
+					if (responseData.responseStatus == "OK"){
+						window.location.replace('/procesarPagina?opcion=index&msgCode=45&user='+$(nombre).val()+' '+$(apellido).val());
+					}else{
+						noty({force: true, timeout: false, text: responseData.errorMessage, type: 'error'});
+					}
+				}
+					
+			});
+			return false;
+		});	
+	})
+	
+	
+	
+		notifMsg = $('input[name=notifMsg]')
+		if($(notifMsg).length)
+			noty({force: true, timeout: false, text: $(notifMsg).val(), type: 'information'});
+		</script>
+		{% if notifMsg %}
+			<input type="hidden" name="notifMsg" value="{{ notifMsg }}" >
+		{% endif %}
+	
+	
+	
+Controlador
+if opcion == 'registrar':
+            #datos sindicato
+            nombre = str(self.request.get('nombre')).decode('utf-8')
+            telefono = str(self.request.get('telefono')).decode('utf-8')
+            descripcion = str(self.request.get('txtDescripcion')).decode('utf-8')
+            #imagen = self.request.get('img')
+            jsonDictionary = {}
+            jsonDictionary['nombre'] = "OK" if validateNotEmptyNotNumber(nombre) else "Ingrese un nombre valido" 
+
+            jsona = validateJsonResponse(jsonDictionary, insertarSindicato,nombre, telefono, descripcion)
+            self.response.headers.add_header('content-type', 'application/json', charset='utf-8')
+            self.response.out.write(jsona)
+            
+            
+			msgCode = self.request.get('msgCode')
+            txt = self.request.get('txt')
+            if opcion == 'index':
+                if msgCode:
+                    self.doRender('index.html',{'notifMsg':getInfoMessageByCode(int(msgCode), txt)})
+                else:
+                    self.doRender('index.html')            
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+TODO:
+1)Agregar un boton de retroceso en el popup de popup_servicio_registrar.html cuando se lo llama desde 
+popup_afiliado_servicio para que vuelva a ese popup. Probar con el windows.back()
+2) VALIDACIONES
+	a) cuando se requiere que un radio este seleccionado
+3) Programar los botones 'Cancelar'. Si se pertenecen a un popup, que cierren la ventana segun convenga.
+10)Ordenar lo mejor posible todos los resultados de las tablas por alguna columna significativa.
+12)Ver porque tengo el problema de que no puedo validar bien un tipo de empresa en entidadConvenio. Estan comentadas las lineas de 
+codigo en la vista y en el controlador.
+15)Ponerle el asterisco a los campos obligatorios. 
+-incluir una opcion historial, que muestre:
+	-todo lo de AccesoServicio...
+	-opcion con enlaces a documentos pdf ordenado por mes...
+16)Hacer la pagina de error, que se pueda redirigir a ella y grabar en la tabla ErrorLog
+-que se permita imprimir vales y tickets...
+18)Entidad Prestadora del convenio no checkea que se esten repitiendo los nombres
+19) Ver como estandarizar esas situaciones en las que tengo un select que lista keyId's, por cuando
+selecciono el primer valor.
+
+20)No estamos controlando bien el tema de las sedes, al momento de registrar una, lo del check de si es una sede principal o no.
+21)Al momento de otorgar un servicio al usuario, desde el popup cuando seleccionamos la lista de servicios desde el checkbox,
+no estamos recuperando bien la lista de checkboxes seleccionados. No se retorna un array correctamente. Parece que hay que hacer
+un serialize desde el form. Probar el serialize() y que despues me muestre bien la lista en la pagina de pago de cuotas.
+
+UTILS
+-formatear fechas jinja2: .strftime('%d/%m/%Y')
+-preguntar length de una lista en jinja2: |length > 0
+-para validar los radio:
+validateSelectedRadio($('input[name=radioSedes]'), $('input[name=btnModificar]'),'Por favor, seleccione una sede de la lista para proceder con la modificacion');
+$('input[name=btnEliminar]').click(function() {
+				if(!($('input[name=radioSedes]').is(':checked'))){
+					alert('Por favor, seleccione una sede de la lista para proceder con la operacion')
+					return false;
+				}
+.....
+
+
+
+
+http://stackoverflow.com/questions/8944294/google-app-engine-conversion-api-failing-with-backenderror
+https://groups.google.com/forum/?fromgroups#!topic/google-appengine-python/dG2CF1IW-ss
+http://stackoverflow.com/questions/9583067/app-engine-file-conversion
+https://developers.google.com/appengine/docs/python/conversion/overview

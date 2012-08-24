@@ -1,0 +1,51 @@
+{% extends "_base.html" %}
+{% block title %}
+	SIGS.:.Editar Servicio
+{% endblock %}
+{% block bodycontent %}
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("#fechaExpiracion").datepicker();
+	})
+</script>
+	{% if mensajeInformacion %}
+		<h3>{{ mensajeInformacion }}</h3> <br>
+	{% endif %}
+	<h2>Editar Servicio</h2>
+	<form  method="post" action="/servicio" name='formRegistro' 
+										onsubmit="return validarCampos(); return false;">
+			<table id="one-column-emphasis">
+			<tr><td>Nombre:</td> <td><input type="text" name="nombre" value="{{rsServicio.nombre}}"/></td></tr>
+			<tr><td>Descripcion:</td> <td> <textarea name="txtDescripcion" rows = "10" cols="50" >{{rsServicio.descripcion}}</textarea></td></tr>
+			<tr><td>Prestador:</td> <td><input type="text" name="prestador" value="{{rsServicio.prestador}}"/></td></tr>
+			<tr><td>Fecha Expiracion:</td><td><input type="text" name="fechaExpiracion" id="fechaExpiracion" value="{{rsServicio.fechaExpiracion.strftime('%d/%m/%Y')}}"  /></td></tr>
+			<tr><td>Lugar Prestacion:</td><td><input type="text" name="prestadoEn" value="{{rsServicio.prestadoEn}}"/></td></tr>
+		</table>
+			<fieldset>
+				<legend>Condiciones</legend>
+				<table>
+					<tr><td>Condicion 1: </td><td><input type="text" name="condicion1"/></td></tr>
+					<tr><td>Condicion 1: </td><td><input type="text" name="condicion2"/></td></tr>
+					<tr><td>Condicion 1: </td><td><input type="text" name="condicion3"/></td></tr>
+					<tr><td>Condicion 1: </td><td><input type="text" name="condicion4"/></td></tr>
+				</table>
+			</fieldset>
+			<br>
+			<fieldset>
+				<legend>Referencias</legend>
+				<table>
+					<tr><td>Persona Referencia:</td> <td><input type="text" name="personaReferencia" value="{{rsServicio.personaReferencia}}"/></td></tr>
+					<tr><td>Telefono Persona Referencia:</td> <td><input type="text" name="telefonoPersonaReferencia" value="{{rsServicio.telefonoPersonaReferencia}}"/></td></tr>
+				</table>
+			</fieldset>
+			<br>
+		<input type="submit" value="Confirmar" class="button-class" name="btnConfirmarEdicion"/>
+		<input type="hidden" value="{{ rsServicio.key() }}" name="keyServicios">
+		<input type="submit" value="Cancelar" 
+			onclick="window.location='/'; return false;" class="button-class"/>
+	</form>
+	{% if error %}
+		<p>{{ error }}</p>
+	{% endif %}
+	
+{% endblock %}

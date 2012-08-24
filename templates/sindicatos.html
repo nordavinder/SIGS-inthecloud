@@ -1,0 +1,87 @@
+{% extends "_base.html" %}
+{% block title %}
+	SIGS.:.Sindicatos
+{% endblock %}
+{% block bodycontent %}
+	<script>
+		$(document).ready(function(){
+			initSimpleTableSorter($("#myTable")); 
+						
+			notifMsg = $('input[name=notifMsg]')
+			if($(notifMsg).length)
+				noty({force: true, timeout: false, text: $(notifMsg).val(), type: 'information'});
+			
+			$('input[name=btnEliminar]').click(function() {
+				sedeElement = $('input[name=radioSedes]:checked')
+				noty({
+					text: 'Esta seguro que desea eliminar la sede \''+$(sedeElement).attr('id')+'\'',
+					buttons: [
+				    {type: 'btn btn-primary', text: 'Aceptar', click: function($noty) {
+				    			$noty.close();
+				    			dataString = 'radioSedes='+$(sedeElement).val()+'&btnEliminar=btnEliminar';
+				    			$.ajax({
+				    				type: 'POST',
+				    				data:dataString,
+				    				url:'/sede',
+				    				dataType: 'json',
+				    				success: function(data){
+				    					if (data.status == 'OK'){
+				    						window.location.replace('/sede?opcion=cia&msgCode=66&txt='+$(sedeElement).attr('id'));
+				    					}else{
+				    						noty({force: true, text: 'La sede \''+$(sedeElement).attr('id')+'\' no pudo ser eliminada. '+data.mensaje, type: 'alert'});
+				    					}
+				    				}
+				    			});
+				    	}
+				    },
+				    {type: 'btn btn-danger', text: 'Cancelar', click: function($noty) {
+				    		$noty.close();
+				    	}
+				    }
+				    ],
+				  closable: false,
+				  timeout: false
+				});
+				return false;
+			});
+			
+		 });
+	</script>
+	{% if notifMsg %}
+		<input type="hidden" name="notifMsg" value="{{ notifMsg }}" >
+	{% endif %}
+	<h1>Lista de sindicatos registrados</h1>
+	<table id="myTable">
+	  {% if listaSindicatos %}
+	  <thead>
+		    <tr>
+		  	  <th></th>
+		      <th>Nombre</th>
+			  <th>Telefono</th>
+			  <th>Descripcion</th>
+		      <th>Fecha Registro</th>
+		    </tr>
+	   </thead>
+	   <tbody>
+		  	<form method="post" action="/sindicato">
+				{% for sindicato in listaSindicatos %}
+					<tr>
+						<td><input type="radio" name="radioSindicatos" id="{{ sindicato.nombre }}" value="{{ sindicato.key() }}"></td>
+						<td><a href="/sindicato?opcion=gotoSindicato&unionKey={{ sindicato.key() }}">{{ sindicato.nombre }}</a></td>
+					    <td>{{ sindicato.telefono }}</td>
+					    <td>{{ sindicato.descripcion }}</td>
+					    <td>{{ sindicato.fechaRegistro.strftime('%d/%m/%Y') }}</td>
+			     	 </tr>
+				{% endfor %}
+				<br>
+				<input type="submit" value="Eliminar" name = "btnEliminar" style="width: 150px;" class='button-class' />
+				<input type="submit" value="Modificar" name = "btnModificar" style="width: 150px;margin-left: 10px;" class='button-class' />
+			</form>
+		</tbody>
+	  {% else %}
+	  	No dispone de sindicatos registrados<br>
+	  	<a href = '/sindicato?opcion=registrar'>Click registrar un nuevo sindicato</a> 
+	  {% endif %}  
+	</table><br>
+	<input type="button" name="btnRegistro" value="Registrar" style="width: 150px;"  onclick="window.location='/sindicato?opcion=registrar'" class='button-class'>
+{% endblock %}

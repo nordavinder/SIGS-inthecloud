@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>Registrar nueva Sede</title>
+		<link type="text/css" href="static/jquery-ui-1.8.21.custom.css" rel="Stylesheet" />	
+		<script src="/static/jquery-1.7.2.min.js"></script>
+		
+	</head>
+	<body>
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$("#formServicio").submit(function(){
+					nombre = $('input[name="nombre"]').val()
+		            descripcion = $('textarea[name="txtDescripcion"]').val()
+		            observaciones = $('textarea[name="txtObservaciones"]').val()
+					btnConfirmarRegistroAjax = $('input[type=submit]').val()
+					dataString = 'nombre='+nombre+'&descripcion='+descripcion+"&observaciones="
+								 +observaciones+"&btnConfirmarRegistroAjax="+btnConfirmarRegistroAjax;
+					
+					$.ajax({
+						type: "POST",
+						url: "/servicio",
+						data: dataString,
+						dataType: "json",
+						success: function(responseData){
+							newSelect = $('<select name="selectServicios" id="selectServicios">');
+							newSelect.append('<option value="nuevoServicio">Registrar Nuevo Servicio </option>');
+							$.each(responseData, function(index, itemData){
+								if(nombre == responseData[index].nombre){
+									newSelect.append('<option value="'+responseData[index].keyId+'" selected="selected">'+responseData[index].nombre+'</option>')
+								}else{
+									newSelect.append('<option value="'+responseData[index].keyId+'">'+responseData[index].nombre+'</option>')
+								}
+							});
+							newSelect.append('</select>');
+							window.opener.jQuery('#selectServicios').replaceWith(newSelect);
+							window.close(); 
+						}
+					});
+					return false;
+				});
+			});
+		</script>
+		{% if mensajeInformacion %}
+			<h3>{{ mensajeInformacion }}</h3> <br>
+		{% endif %}
+		<h2>Registrar Servicio</h2>
+		<form  method="post" action="/servicio" name='formRegistro' id="formServicio">
+			<table id="one-column-emphasis">
+				<tr><td>Nombre:</td> <td><input type="text" name="nombre"/></td></tr>
+				<tr><td>Descripcion:</td> <td> <textarea name="txtDescripcion" rows = "5" cols="40" ></textarea></td></tr>
+				<tr><td>Observaciones:</td> <td> <textarea name="txtObservaciones" rows = "5" cols="40" >Registra bases y condiciones para acceder al servicio, etc.</textarea></td></tr>
+			</table>
+			<input type="submit" value="Registrar" class="button-class" name="btnConfirmarRegistroAjax"/>
+			<input type="submit" value="Cancelar" 
+				onclick="window.location='/'; return false;" class="button-class"/>
+		</form>
+	</body>
+</html>

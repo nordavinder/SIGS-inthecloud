@@ -1,0 +1,313 @@
+{% extends "_base.html" %}
+{% block title %}
+	SIGS.:.Afiliados
+{% endblock %}
+{% block bodycontent %}
+	<script type="text/javascript">
+		$(document).ready(function(){
+			initFullTableSorter($("#tablaPagosMesActual"));
+			initFullTableSorter($("#tablaDeudasHistoricas"));
+			initFullTableSorter($("#tablaServicioContraidoMesActual"));
+			//mostrar el historial de AccesoServicioVigentes
+			$("#historialAccesoServicioVigentes").click(function(){
+				window.location.href='/accesoServicios?opcion=historial'
+			});
+			
+			//ocultar los divs
+			$("#ocultarDivAccesoServicioVigentes").click(function(){
+				$("#divAccesoServicioVigentes").hide("slow");
+				$(this).hide();
+				$("#mostrarDivAccesoServicioVigentes").show();
+			});
+			$("#mostrarDivAccesoServicioVigentes").click(function(){
+				$(this).hide();
+				$("#ocultarDivAccesoServicioVigentes").show();
+				$("#divAccesoServicioVigentes").show("slow");
+			});
+			
+			$("#ocultarDivPagosMesActual").click(function(){
+				$("#divPagosMesActual").hide("slow");
+				$(this).hide();
+				$("#mostrarDivPagosMesActual").show();
+			});
+			$("#mostrarDivPagosMesActual").click(function(){
+				$(this).hide();
+				$("#ocultarDivPagosMesActual").show();
+				$("#divPagosMesActual").show("slow");
+			});
+			
+			
+			$('input[name=btnServicioOtorgar]').click(function(){
+				usuarioRadio = $('input[name=radioAfiliados]:checked').val()
+				window.open('/valeServicio?opcion=registrar&keyIdAfiliado='+usuarioRadio,'_blank','scrollbars=1, height=700, width=750')
+				return false;
+			});
+			
+			$("#divValesMesActual").find('input[type=radio]').click(function()
+				{
+					opcionSeleccionada = $(this).val()
+					if (opcionSeleccionada == 'totalmentePagados'){
+						$.getJSON(
+							'/json',
+							{
+								opcion: 'contabilidad',
+								radio:  opcionSeleccionada  
+							},
+							function(responseData){
+								if(responseData.length > 0){
+									tablaServicioContraidoMesActual = $('#formServicioContraidoMesActual')
+									nuevaTabla = $('<form method="post" action="/accesoServicio" id="formServicioContraidoMesActual">')
+									nuevaTabla.append('<input type="submit" value="Eliminar" name = "btnEliminar" class="button-class" style="width: 150px;">')
+									nuevaTabla.append('<input type="submit" value="Modificar" name = "btnModificar" class="button-class" style="width: 150px; margin-left: 10px;">')
+									nuevaTabla.append('<table id="tablaServicioContraidoMesActual">')
+									nuevaTabla.append('<tr><th></th><th>Recibo Sueldo</th><th>Apellido y Nombre</th><th>'+
+											'Nro Autorizacion</th><th>Servicio</th><th>Nro Cuotas</th><th>Resumen Cuotas</th>'+
+											'<th>Importe</th></tr>')
+									$.each(responseData, function(i, item){
+										nuevaTabla.append('<tr>');
+										nuevaTabla.append('<td><input type="radio" name="radioAccesoServicio" value='+responseData[i].keyId+'></td>');
+										nuevaTabla.append('<td>'+responseData[i].reciboSueldoNro+'</td>');
+										nuevaTabla.append('<td><a href="/accesoServicios?opcion=detalles&keyId='+responseData[i].keyId+'">'+responseData[i].nombreAfiliado+'</a></td>');
+										nuevaTabla.append('<td>'+responseData[i].numeroAutorizacion+'</td>');
+										nuevaTabla.append('<td>'+responseData[i].nombreServicio+'</td>');
+										nuevaTabla.append('<td>'+responseData[i].numeroCuotas+'</td>');
+										nuevaTabla.append('<td>'+responseData[i].resumenCuotas+'</td>');
+										nuevaTabla.append('<td>'+responseData[i].monto+'</td>');
+										nuevaTabla.append('</tr>');
+									});
+									nuevaTabla.append('</table>')
+									nuevaTabla.append('</form>')
+									$(tablaServicioContraidoMesActual).empty()
+									$(tablaServicioContraidoMesActual).append(nuevaTabla)
+								}else{
+									$(tablaServicioContraidoMesActual).empty()
+									$(tablaServicioContraidoMesActual).append('No se encuentran datos.')
+								}
+							}
+						)
+					}
+					if (opcionSeleccionada == 'parcialmentePagados'){
+						$.getJSON(
+							'/json',
+							{
+								opcion: 'contabilidad',
+								radio:  opcionSeleccionada  
+							},
+							function(responseData){
+								if(responseData.length > 0){
+									tablaServicioContraidoMesActual = $('#formServicioContraidoMesActual')
+									nuevaTabla = $('<form method="post" action="/accesoServicio" id="formServicioContraidoMesActual">')
+									nuevaTabla.append('<input type="submit" value="Eliminar" name = "btnEliminar" class="button-class" style="width: 150px;">')
+									nuevaTabla.append('<input type="submit" value="Modificar" name = "btnModificar" class="button-class" style="width: 150px; margin-left: 10px;">')
+									nuevaTabla.append('<table id="tablaServicioContraidoMesActual">')
+									nuevaTabla.append('<tr><th></th><th>Recibo Sueldo</th><th>Apellido y Nombre</th><th>'+
+											'Nro Autorizacion</th><th>Servicio</th><th>Nro Cuotas</th><th>Resumen Cuotas</th>'+
+											'<th>Importe</th></tr>')
+									$.each(responseData, function(i, item){
+										nuevaTabla.append('<tr>');
+										nuevaTabla.append('<td><input type="radio" name="radioAccesoServicio" value='+responseData[i].keyId+'></td>');
+										nuevaTabla.append('<td>'+responseData[i].reciboSueldoNro+'</td>');
+										nuevaTabla.append('<td><a href="/accesoServicios?opcion=detalles&keyId='+responseData[i].keyId+'">'+responseData[i].nombreAfiliado+'</a></td>');
+										nuevaTabla.append('<td>'+responseData[i].numeroAutorizacion+'</td>');
+										nuevaTabla.append('<td>'+responseData[i].nombreServicio+'</td>');
+										nuevaTabla.append('<td>'+responseData[i].numeroCuotas+'</td>');
+										nuevaTabla.append('<td>'+responseData[i].resumenCuotas+'</td>');
+										nuevaTabla.append('<td>'+responseData[i].monto+'</td>');
+										nuevaTabla.append('</tr>');
+									});
+									nuevaTabla.append('</table>')
+									nuevaTabla.append('</form>')
+									$(tablaServicioContraidoMesActual).empty()
+									$(tablaServicioContraidoMesActual).append(nuevaTabla)
+								}else{
+									$(tablaServicioContraidoMesActual).empty()
+									$(tablaServicioContraidoMesActual).append('No se encuentran datos.')
+								}
+							}
+						)
+					}
+					if (opcionSeleccionada == 'todo'){
+						$.getJSON(
+							'/json',
+							{
+								opcion: 'contabilidad',
+								radio:  opcionSeleccionada  
+							},
+							function(responseData){
+								if(responseData.length > 0){
+									tablaServicioContraidoMesActual = $('#formServicioContraidoMesActual')
+									nuevaTabla = $('<form method="post" action="/accesoServicio" id="formServicioContraidoMesActual">')
+									nuevaTabla.append('<input type="submit" value="Eliminar" name = "btnEliminar" class="button-class" style="width: 150px;">')
+									nuevaTabla.append('<input type="submit" value="Modificar" name = "btnModificar" class="button-class" style="width: 150px; margin-left: 10px;">')
+									nuevaTabla.append('<table id="tablaServicioContraidoMesActual">')
+									nuevaTabla.append('<tr><th></th><th>Recibo Sueldo</th><th>Apellido y Nombre</th><th>'+
+											'Nro Autorizacion</th><th>Servicio</th><th>Nro Cuotas</th><th>Resumen Cuotas</th>'+
+											'<th>Importe</th></tr>')
+									$.each(responseData, function(i, item){
+										nuevaTabla.append('<tr>');
+										nuevaTabla.append('<td><input type="radio" name="radioAccesoServicio" value='+responseData[i].keyId+'></td>');
+										nuevaTabla.append('<td>'+responseData[i].reciboSueldoNro+'</td>');
+										nuevaTabla.append('<td><a href="/accesoServicios?opcion=detalles&keyId='+responseData[i].keyId+'">'+responseData[i].nombreAfiliado+'</a></td>');
+										nuevaTabla.append('<td>'+responseData[i].numeroAutorizacion+'</td>');
+										nuevaTabla.append('<td>'+responseData[i].nombreServicio+'</td>');
+										nuevaTabla.append('<td>'+responseData[i].numeroCuotas+'</td>');
+										nuevaTabla.append('<td>'+responseData[i].resumenCuotas+'</td>');
+										nuevaTabla.append('<td>'+responseData[i].monto+'</td>');
+										nuevaTabla.append('</tr>');
+									});
+									nuevaTabla.append('</table>')
+									nuevaTabla.append('</form>')
+									$(tablaServicioContraidoMesActual).empty()
+									$(tablaServicioContraidoMesActual).append(nuevaTabla)
+								}else{
+									$(tablaServicioContraidoMesActual).empty()
+									$(tablaServicioContraidoMesActual).append('No se encuentran datos.')
+								}
+							}
+						)
+					}
+				}
+			)
+			
+		});		
+
+	</script>
+	
+	<h1>Afiliados con deudas historicas</h1><br>
+	<img src="static/down.png" alt="mostrar-menos" height="30px;" style="float: right;" id="ocultarDivAccesoServicioVigentes">
+	<img src="static/up.png" alt="mostrar-menos" height="30px;" style="float: right;" id="mostrarDivAccesoServicioVigentes" hidden="hidden">
+	<div style="padding-right: 35px;"><img src="static/calendar.png" alt="mostrar-menos" height="30px;" style="float: right;" id="historialAccesoServicioVigentes"></div>
+	<div id="divAccesoServicioVigentes">
+		<table id="tablaDeudasHistoricas">
+		  {% if rsAccesoServicioVigentes %}
+		  <thead>
+			    <tr>
+			  	  <th></th>
+			      <th>Recibo Sueldo</th>
+				  <th>Apellido y Nombre</th>
+				  <th>Nro Autorizacion</th>
+				  <th>Servicio</th>
+				  <th>Nro de Cuotas</th>
+				  <th>Cuotas Cubiertas</th>
+				  <th>Importe</th>
+				  <th>Pagado</th>
+				  <th>Debe</th>
+			    </tr>
+		    </thead>
+		    <tbody>
+		  	<form method="post" action="/accesoServicio">
+				{% for accesoServicio in rsAccesoServicioVigentes %}
+					<tr>
+						<td><input type="radio" name="radioAccesoServicio" value="{{ accesoServicio.key() }}"></td>
+						<td>{{ accesoServicio.vale.reciboSueldoNro }}</td>
+						<td><a href="/accesoServicios?opcion=detalles&keyId={{ accesoServicio.key() }}">{{ accesoServicio.afiliado.usuario.primerApellido }} {{ accesoServicio.afiliado.usuario.segundoApellido }}, {{ accesoServicio.afiliado.usuario.primerNombre }} {{ accesoServicio.afiliado.usuario.segundoNombre }}</a></td>
+					    <td>{{ accesoServicio.vale.numeroAutorizacion }}</td>
+					    <td>{{ accesoServicio.vale.servicio.nombre }}</td>
+					    <td>{{ accesoServicio.vale.numeroCuotas }}</td>
+					    <td>{{ accesoServicio.vale.numeroCuotasPagadas }} / {{ accesoServicio.vale.numeroCuotas }}</td>
+					    <td>{{ accesoServicio.vale.monto }}</td>
+					    <td>{{ accesoServicio.vale.numeroCuotasPagadas * (accesoServicio.vale.monto / accesoServicio.vale.numeroCuotas) }}</td>
+					    <td>{{ accesoServicio.vale.monto - (accesoServicio.vale.numeroCuotasPagadas * (accesoServicio.vale.monto / accesoServicio.vale.numeroCuotas)) }}</td>
+			     	 </tr>
+				{% endfor %}
+				<input type="submit" value="Eliminar" name = "btnEliminar" class='button-class' style="width: 150px;">
+				<input type="submit" value="Modificar" name = "btnModificar" class='button-class' style="width: 150px; margin-left: 10px;">
+			</form>
+			</tbody>
+		  {% else %}
+		  	No se registran deudas historicas<br> 
+		  {% endif %}  
+		</table><br>
+	</div>
+	<h1>Afiliados con pagos del mes</h1>
+	  <img src="static/down.png" alt="mostrar-menos" height="30px;" style="float: right;" id="ocultarDivPagosMesActual">
+	  <img src="static/up.png" alt="mostrar-menos" height="30px;" style="float: right;" id="mostrarDivPagosMesActual" hidden="hidden">
+	  <div id="divPagosMesActual">
+		  {% if rsobtenerAccesoServicioPagosMesActual %}
+		  	<form method="post" action="/accesoServicio">
+		  		<br>
+		  		<input type="submit" value="Eliminar" name = "btnEliminar" class='button-class' style="width: 150px;">
+				<input type="submit" value="Modificar" name = "btnModificar" class='button-class' style="width: 150px; margin-left: 10px;">
+				 <table id="tablaPagosMesActual">
+				 <thead>
+					    <tr>
+					  	  <th></th>
+					      <th>Recibo Sueldo</th>
+						  <th>Apellido y Nombre</th>
+						  <th>Nro Autorizacion</th>
+						  <th>Servicio</th>
+						  <th>Nro de Cuotas Pagadas</th>
+						  <th>Monto a descontar</th>
+					    </tr>
+				    </thead>
+				    <tbody>
+					{% for accesoServicio in rsobtenerAccesoServicioPagosMesActual %}
+						<tr>
+							<td><input type="radio" name="radioAccesoServicio" value="{{ accesoServicio.key() }}"></td>
+							<td>{{ accesoServicio.vale.reciboSueldoNro }}</td>
+							<td><a href="/accesoServicio?opcion=detalles&keyId={{ accesoServicio.key() }}">{{ accesoServicio.afiliado.usuario.primerApellido }} {{ accesoServicio.afiliado.usuario.segundoApellido }}, {{ accesoServicio.afiliado.usuario.primerNombre }} {{ accesoServicio.afiliado.usuario.segundoNombre }}</a></td>
+						    <td>{{ accesoServicio.vale.numeroAutorizacion }}</td>
+						    <td>{{ accesoServicio.vale.servicio.nombre }}</td>
+						    <td>{{ accesoServicio.cuotaPagada }}</td>
+						    <td>{{ accesoServicio.montoAbonado }}</td>
+				     	 </tr>
+					{% endfor %}
+					</tbody>
+					<tfoot>
+					 	<tr>
+					 		<td><b>Total</b></td>
+					 		<td colspan="6"><input type="text" style="float: right; text-align: right;" value="{{ totalPagosMesActual }}" readonly="readonly" name="txtMontoTotal"/>
+					 	</tr>
+				 	</tfoot>
+				 </table>
+			</form>
+		  {% else %}
+		  	El sindicato no ha otorgado vales de servicios todavia.<br> 
+		  {% endif %}
+	</div>  
+	<br>
+	<h1>Afiliados con vales del mes</h1>
+	<br>
+	<div id="divValesMesActual">
+		Todo <input type="radio" name="valesObtenidosMesActual" value="todo">
+		Pagados <input type="radio" name="valesObtenidosMesActual" value="totalmentePagados">
+		Parcialmente <input type="radio" name="valesObtenidosMesActual" value="parcialmentePagados">
+	</div>
+	{% if rsAccesoServicioContraidoMesActual %}
+  	<form method="post" action="/accesoServicio" id="formServicioContraidoMesActual">
+  		<br>
+		<input type="submit" value="Eliminar" name = "btnEliminar" class='button-class' style="width: 150px;">
+		<input type="submit" value="Modificar" name = "btnModificar" class='button-class' style="width: 150px; margin-left: 10px;">
+		<table id="tablaServicioContraidoMesActual">
+		<thead>
+			    <tr>
+			  	  <th></th>
+			      <th>Recibo Sueldo</th>
+				  <th>Apellido y Nombre</th>
+				  <th>Nro Autorizacion</th>
+				  <th>Servicio</th>
+				  <th>Nro Cuotas</th>
+				  <th>Resumen Cuotas</th>
+				  <th>Importe</th>
+			    </tr>
+		   </thead>
+		   <tbody>
+				{% for accesoServicio in rsAccesoServicioContraidoMesActual %}
+					<tr>
+						<td><input type="radio" name="radioAccesoServicio" value="{{ accesoServicio.key() }}"></td>
+						<td>{{ accesoServicio.vale.reciboSueldoNro }}</td>
+						<td><a href="/accesoServicios?opcion=detalles&keyId={{ accesoServicio.key() }}">{{ accesoServicio.afiliado.usuario.primerApellido }} {{ accesoServicio.afiliado.usuario.segundoApellido }}, {{ accesoServicio.afiliado.usuario.primerNombre }} {{ accesoServicio.afiliado.usuario.segundoNombre }}</a></td>
+					    <td>{{ accesoServicio.vale.numeroAutorizacion }}</td>
+					    <td>{{ accesoServicio.vale.servicio.nombre }}</td>
+					    <td>{{ accesoServicio.vale.numeroCuotas }}</td>
+					    <td>{{ accesoServicio.vale.numeroCuotasPagadas }} / {{ accesoServicio.vale.numeroCuotas }}</td>
+					    <td>{{ accesoServicio.vale.monto }}</td>
+			     	 </tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</form>
+	  {% else %}
+	  	El sindicato no ha otorgado vales de servicios todavia.<br> 
+	  {% endif %}  
+{% endblock %}

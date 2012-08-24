@@ -1,0 +1,60 @@
+{% extends "_base.html" %}
+{% block title %}
+	SIGS.:.Entidad Convenio
+{% endblock %}
+{% block bodycontent %}
+	<script type="text/javascript">
+		$(document).ready(function(){
+			initSimpleTableSorter($("#myTable"));
+			notifMsg = $('input[name=notifMsg]')
+			if($(notifMsg).length)
+				noty({force: true, timeout: false, text: $(notifMsg).val(), type: 'information'});
+		 });
+	</script>
+	<h1>Lista de Entidades Convenio</h1>
+	{% if mensajeInfo %}
+		{{ mensajeInfo }} <br>
+	{% endif %}
+	<table id="myTable">
+	  {% if listaEntidadConvenio %}
+	  	<thead>
+		    <tr>
+		  	  <th></th>
+		      <th>Nombre</th>
+			  <th>Tipo de Empresa</th>
+			  <th>Telefono de la Empresa</th>
+			  <th>Fecha de Convenio</th>
+			  <th>Fecha Expiracion del Convenio</th>
+		    </tr>
+	    </thead>
+	    <tbody>
+		  	<form method="post" action="/entidadConvenio">
+				{% for entidadConvenio in listaEntidadConvenio %}
+					<tr>
+						<td><input type="radio" name="radioEntidadConvenio" value="{{ entidadConvenio.key() }}"></td>
+						<td><a href="/entidadConvenio?opcion=detalles&keyId={{ entidadConvenio.key() }}">{{ entidadConvenio.nombre }}</a></td>
+					    <td>{{ entidadConvenio.tipoDeEmpresa }}</td>
+					    <td>{{ entidadConvenio.telefonoEmpresa }}</td>
+					    <td>{{ entidadConvenio.fechaCreacion.strftime('%d/%m/%Y') }}</td>
+					    {% if entidadConvenio.fechaExpiracion != None %}
+					    	<td>{{ entidadConvenio.fechaExpiracion.strftime('%d/%m/%Y') }}</td>
+					    {% else %}
+					    	<td>-</td>
+					    {% endif %}
+			     	 </tr>
+				{% endfor %}
+				<br>
+				<input type="submit" value="Eliminar" name = "btnEliminar" style="width: 150px;" class='button-class'>
+				<input type="submit" value="Modificar" name = "btnModificar" style="width: 150px; margin-left: 10px;" class='button-class'>
+			</form>
+		</tbody>
+	  {% else %}
+	  	<br>El sindicato no disponde de entidades prestadoras de servicio.<br><br> 
+	  	<a href = '/entidadConvenio?opcion=registrar'>Click para adicionar un nuevo convenio con el sindicato</a> 
+	  {% endif %}  
+	</table><br>
+	{% if notifMsg %}
+		<input type="hidden" name="notifMsg" value="{{ notifMsg }}" >
+	{% endif %}
+	<input type="button" name="btnRegistro" style="width: 150px;" value="Registrar" onclick="window.location='/entidadConvenio?opcion=registrar'" class='button-class'>
+{% endblock %}

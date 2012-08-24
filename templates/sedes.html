@@ -1,0 +1,115 @@
+{% extends "_base.html" %}
+{% block title %}
+	SIGS.:.Sedes
+{% endblock %}
+{% block bodycontent %}
+	<script>
+		$(document).ready(function(){
+			initSimpleTableSorter($("#myTable"));
+			validateSelectedRadio($('input[name=radioSedes]'), $('input[name=btnModificar]'),'Por favor, seleccione una sede de la lista para proceder con la modificacion');
+			
+			notifMsg = $('input[name=notifMsg]')
+			if($(notifMsg).length)
+				noty({force: true, timeout: false, text: $(notifMsg).val(), type: 'information'});
+			
+			$('input[name=btnEliminar]').click(function() {
+				if(!($('input[name=radioSedes]').is(':checked'))){
+					alert('Por favor, seleccione una sede de la lista para proceder con la operacion')
+					return false;
+				}
+				sedeElement = $('input[name=radioSedes]:checked')
+				noty({
+					text: 'Esta seguro que desea eliminar la sede \''+$(sedeElement).attr('id')+'\'',
+					buttons: [
+				    {type: 'btn btn-primary', text: 'Aceptar', click: function($noty) {
+				    			$noty.close();
+				    			dataString = 'radioSedes='+$(sedeElement).val()+'&btnEliminar=btnEliminar';
+				    			$.ajax({
+				    				type: 'POST',
+				    				data:dataString,
+				    				url:'/sede',
+				    				dataType: 'json',
+				    				success: function(data){
+				    					if (data.status == 'OK'){
+				    						window.location.replace('/sede?opcion=cia&msgCode=66&txt='+$(sedeElement).attr('id'));
+				    					}else{
+				    						noty({force: true, text: 'La sede \''+$(sedeElement).attr('id')+'\' no pudo ser eliminada. '+data.mensaje, type: 'alert'});
+				    					}
+				    				}
+				    			});
+				    	}
+				    },
+				    {type: 'btn btn-danger', text: 'Cancelar', click: function($noty) {
+				    		$noty.close();
+				    	}
+				    }
+				    ],
+				  closable: false,
+				  timeout: false
+				});
+				return false;
+			});
+			
+			//para mostrar la ventana modal
+			var f = function outterFunction(element){
+				keyId = $(element).attr("id");
+				  $.getJSON(
+					  "/sede",
+					  {keyId : keyId, opcion : 'sedeJSON'}, 
+			  		  function(responseData){
+						  _array = responseData 
+						  construirDialogo($('#dialog'),'Sede',_array); 
+					  }
+				  )				
+			}
+			mostrarDialogo($('#dialog'),$('#trSedes a'), f);
+			
+			
+		 });
+	</script>
+	{% if notifMsg %}
+		<input type="hidden" name="notifMsg" value="{{ notifMsg }}" >
+	{% endif %}
+	<h1>Lista de las sedes</h1>
+  	<form method="post" action="/sede">
+		<table id="myTable">
+		  {% if listaSedes %}
+		  <thead>
+			    <tr>
+			  	  <th></th>
+			      <th>Nombre</th>
+				  <th>Direccion</th>
+				  <th>Telefono</th>
+				  <th>Encargado</th>
+			      <th>Telefono Encargado</th>
+			    </tr>
+			    </thead>
+		    <tbody>
+					{% for sede in listaSedes %}
+						<tr id="trSedes">
+							<td><input type="radio" name="radioSedes" id="{{ sede.sede.nombre }}" value="{{ sede.sede.key() }}"></td>
+							<td><a href="/sede?opcion=detalles&keyId={{ sede.sede.key() }}" id="{{ sede.sede.key() }}">{{ sede.sede.nombre }}</a></td>
+						    <td>{{ sede.sede.direccion.calle }} {{ sede.sede.direccion.numeroCalle }}</td>
+						    <td>{{ sede.sede.telefono }}</td>
+						    {% if sede.encargado %}
+						    	<td>{{ sede.encargado.usuario.primerNombre }}</td>
+							    <td>{{ sede.encargado.usuario.telefono }}</td>
+						    {% else %}
+						    	<td>-</td>
+						    	<td>-</td>
+						    {% endif %}
+				     	 </tr>
+					{% endfor %}
+					<br>
+					<input type="button" value="Eliminar" name = "btnEliminar" style="width: 150px;" class='button-class'>
+					<input type="submit" value="Modificar" name = "btnModificar" style="width: 150px; margin-left: 10px;"  class='button-class'>
+			</tbody>
+		  {% else %}
+		  	<br>No se registran sedes cargadas para el sindicato<br><br>
+		  	<a href = '/sede?opcion=registrar'>Click para vincular una nueva sede al sindicato</a> 
+		  {% endif %}  
+		</table><br>
+	</form>
+	<input type="button" name="btnRegistro" value="Registrar" style="width: 150px;" onclick="window.location='/sede?opcion=registrar'" class='button-class'>
+	<div id="dialog" title="Sede" style="display: none;"></div>
+{% endblock %}

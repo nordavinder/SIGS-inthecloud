@@ -1,0 +1,4 @@
+cron:
+- description: se ejecuta cada inicio de mes para resetear el campo isMontoSueldoNetoActualizado de los afiliados. 
+  url: /cronTask
+  schedule: 1 of month 00:00

@@ -1,0 +1,16 @@
+{% extends "_base_popup.html" %}
+{% block title %}
+	SIGS.:.Sindicato
+{% endblock %}
+{% block bodycontent %}
+	<div id="stylized" class="myform">
+		<h1>Sindicato</h1>
+		<p>Nombre: {{ rsSindicato.nombre }}</p>
+		<p>Telefono: {{ rsSindicato.telefono }}</p>
+		<p>Descripcion: {{ rsSindicato.descripcion }}</p>
+		<p>Fecha de Registro: {{ rsSindicato.fechaRegistro.strftime('%d/%m/%Y') }}</p>
+		<p>Imagen</p>
+		<img src='img?img_id={{ rsSindicato.key() }}'></img>
+		
+	</div>
+{% endblock %}

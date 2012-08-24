@@ -1,0 +1,20 @@
+{% extends "_base_popup.html" %}
+{% block title %}
+	SIGS.:.Sedes
+{% endblock %}
+{% block bodycontent %}
+	<div id="stylized" class="myform">
+		<h1>Sede</h1>
+		<p>Nombre: {{ rsSede.nombre }}</p>
+		<p>Sede Principal?: {{ rsSede.principal }}</p>
+		<p>Telefono: {{ rsSede.telefono }}</p>
+		<p>Descripcion: {{ rsSede.descripcion }}</p>
+		<p>Fecha de Registro: {{ rsSede.fechaRegistro.strftime('%d/%m/%Y') }}</p>
+		<h1>Direccion</h1>
+		<p>Calle: {{ rsSede.direccion.calle }}</p>
+		<p>Numero de calle: {{ rsSede.direccion.numeroCalle }}</p>
+		<p>Provincia: {{ rsSede.direccion.provincia }}</p>
+		<p>Localidad: {{ rsSede.direccion.localidad }}</p>
+		<p>Codigo Postal: {{ rsSede.direccion.codigoPostal }}</p>
+	</div>
+{% endblock %}

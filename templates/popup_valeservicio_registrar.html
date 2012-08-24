@@ -1,0 +1,216 @@
+{% extends "_base_popup.html" %}
+{% block title %}
+	SIGS.:.Vale De Servicio
+{% endblock %}
+{% block bodycontent %}
+{% if rsServicio is defined %}
+	<script type="text/javascript">
+			$(document).ready(function(){
+				//vamos a comprobar si el atributo isMontoSueldoNetoActualizado del afiliado es True
+				$.getJSON("/valeServicio",
+						{
+							opcion:'checkResetMontoSueldoAfiliado',
+							keyIdAfiliado:$('input[name=afiliadoHidden]').val()
+						}, 
+						function(responseData){
+							if(responseData.showEnterSaldoDialog == 'S'){
+								var pMontoNeto = prompt("Ingrese el monto neto total del afiliado correspondiente al mes en curso : ", "0");
+							   	if 	(pMontoNeto == null){
+								   	window.close(); 
+							   	}else{
+							   		var pReciboSueldoNro = prompt('Ingrese el numero de recibo de sueldo correspondiente al mes en curso',"0");
+							   		if (pReciboSueldoNro == null)
+							   			window.close();
+									$.getJSON("/valeServicio",
+											{
+												opcion:'actualizarMontoNetoSueldo',
+												keyIdAfiliado:$('input[name=afiliadoHidden]').val(),
+												montoNeto : pMontoNeto,
+												reciboSueldoNro : pReciboSueldoNro 	
+											},
+											function(data){
+												tituloMonto = $('#tituloMonto')
+												newTituloMonto = $('<h3 id="tituloMonto">'+data.montoNetoSueldo+'</h3>')
+												$(tituloMonto).replaceWith(newTituloMonto)
+												$("input[name=reciboSueldoNro]").val(data.reciboSueldoNro)
+											}
+									);	   		
+							   	}
+							}
+						}
+				);
+				
+				//para setear la fecha actual al campo fechaPrestacion
+				var myDate = new Date();
+				var fechaFormateada = myDate.getDate() + '/' + (myDate.getMonth()+1) + '/'+
+		        myDate.getFullYear();
+				$('input[name=fechaPrestacion]').val(fechaFormateada);
+				$('input[name=fechaPrestacion]').datepicker();
+				
+				fieldSetLugarPrestacionServicio = $('#fsLugarPrestacionServicio')
+				$("select[name=selectServicio]").change(function(){
+					if($(this).val() == 'nuevoServicioAfiliado'){
+						window.open('/servicioAfiliado?opcion=registrar&keyIdAfiliado={{ rsAfiliado.key() }}','_self', 'height=750, width=750');
+					}
+					$.getJSON("/valeServicio",
+						{
+						servicioKeyId: $(this).val(),
+						opcion: "entidadesConvenioPorServicio"
+						},
+						function(responseData){
+							newFieldSet = $('<fieldset id="fsLugarPrestacionServicio"><h1>Lugar Prestacion del servicio</h1><p>Entidades</p>')
+							$.each(responseData, function(i, item){
+								_entidadNombre = responseData[i].entidadNombre
+								newFieldSet.append('<label>'+_entidadNombre+'</label><div class="spacer"></div>')
+								//recorremos la lista de lugares
+								$.each(responseData[i].lugarPrestacion, function(indiceLugar, itemLugar){
+									_direccionLugar =  responseData[i].lugarPrestacion[indiceLugar].nombreLugar
+									newFieldSet.append('<input type="checkbox" name="chkLugarVale" value="'+_entidadNombre+ ':' +_direccionLugar+'">'+_direccionLugar+'<div class="spacer"></div>') //antes el value era responseData[i].lugarPrestacion[indiceLugar].lugarKey	
+								});
+							});
+							newFieldSet.append('</fieldset>')
+							$(fieldSetLugarPrestacionServicio).empty();
+							$(fieldSetLugarPrestacionServicio).append(newFieldSet);
+						});
+				});
+				
+				
+				
+				$('#formValeServicio').submit(function(){
+					/*
+					var array = [
+								 validarCampoTexto($('textarea[name=txtObservaciones]'), 'Ingrese algunas observaciones', 'string'),
+								 validarCampoTexto($('input[name=monto]'), 'Ingrese un monto valido', 'number'),
+								 validarCampoTexto($('input[name=salame]'), 'Ingrese el numero de las cuotas', 'number'),
+								 validarCampoTexto($('input[name=fechaPrestacion]'), 'Ingrese la fecha del prestamo'),
+								 validarCampoTexto($('input[name=numeroAutorizacion]'), 'Ingrese el numero de la autorizacion','number')
+					             ]
+
+					if (!validateArray(array, 'error', 'Verifique los campos invalidos...', false, 'top')){
+						return false;
+					}
+					*/
+					valMontoDisponible = $('#tituloMonto').text()
+					valMontoVale = $('input[name=monto]')
+					if(parseFloat($(valMontoVale).val()) > parseFloat(valMontoDisponible)){
+						noty({force: true, timeout: 5000, layout : 'top', text: 'El sueldo neto disponible del afiliado no puede cubrir el total del monto ingresado', type: 'error'});
+						markFieldAsNotValid($(valMontoVale))
+						return false;
+					}else{
+						removeErrorMessage($(valMontoVale))
+					}
+					
+		            btnConfirmarRegistroAjax = $('input[name=btnConfirmarRegistroAjax]').val()
+					
+					afiliadoHidden = $('input[name=afiliadoHidden]').val()
+		            selectServicio = $('select[name=selectServicio]').val()
+		            txtObservaciones = $('textarea[name=txtObservaciones]').val()   
+		            chkLugarVale = $('input[name=chkLugarVale]')
+		            monto = $('input[name=monto]').val()
+		            numeroCuotas = $('input[name=salame]').val()
+		            fechaPrestacion = $('input[name=fechaPrestacion]').val()
+		            dataString = 'afiliadoHidden='+afiliadoHidden+'&selectServicio='+selectServicio+   
+		            			  '&txtObservaciones='+txtObservaciones+'&chkLugarVale='+chkLugarVale+'&numeroAutorizacion='+$('input[name=numeroAutorizacion]').val()+
+		            			  '&monto='+monto+'&salame='+$('input[name=salame]').val()+'&fechaPrestacion='+fechaPrestacion+
+		            			  '&reciboSueldoNro='+$("input[name=reciboSueldoNro]").val()+
+		            			  '&btnConfirmarRegistroAjax='+btnConfirmarRegistroAjax;
+					//var dataString = $(this).serialize();
+					$.ajax({
+						type: "POST",
+						url:"/valeServicio",
+						data:dataString,
+						dataType:"json",
+						success: function(responseData){
+							if(responseData.responseStatus == 'OK'){
+								window.close();
+								window.opener.location.replace('/accesoServicios?opcion=showmedo');								
+							}
+						}
+					});
+					return false;
+				});
+			});
+		</script>
+	<div id="stylized" class="myform">		
+		<h1>Otorgar vale</h1>
+		<p>Resumen</p>
+		Monto neto actual del sueldo:<h3 id="tituloMonto"> {{ rsAfiliado.montoSueldoNeto }}</h3>
+		Deuda total del afiliado con el Sindicato: <h3> {{ rsAfiliado.deuda }}</h3> 
+		<p></p>
+		<form  method="post" action="/valeServicio" name='formRegistro' 
+											id="formValeServicio">
+				<label>Afiliado:
+				<span class="small">El nombre del afiliado</span>
+				</label>
+				<input type="text" readonly="readonly" value="{{ rsAfiliado.usuario.primerNombre }} {{ rsAfiliado.usuario.primerApellido }}"/>
+				<div class="spacer"></div>
+				<fieldset>
+					<h1>Servicios</h1>
+					{% if rsServicio%}
+						<p>Seleccione un servicio</p>
+						<select name="selectServicio">
+							<option value="nuevoServicioAfiliado">Relacionar a nuevo servicio</option>
+							{% for afiliadoServicio in rsServicio %}
+								<option value="{{ afiliadoServicio.servicio.key() }}">{{ afiliadoServicio.servicio.nombre }}</option>
+							{% endfor %}
+						</select>
+					<fieldset id="fsLugarPrestacionServicio">
+						<h1>Lugar Prestacion del servicio</h1>
+						<p>Seleccione un servicio...</p>
+					</fieldset>
+					{% else %}
+						<p>El afiliado no fue vinculado con ningun servicio</p>
+					{% endif %}
+				</fieldset>
+				
+				<label>Observaciones (*)
+				<span class="small">Ingresa algunas observaciones pertinentes</span>
+				</label>
+				<textarea name="txtObservaciones" rows = "5" cols="35" ></textarea>
+				
+				<label>Monto (*)
+				<span class="small">Ingresa el monto del servicio</span>
+				</label>
+				<input type="text" name="monto" />
+
+				
+				<label>Fecha Prestamo (*)
+				<span class="small">Ingresa la fecha del prestamo</span>
+				</label>
+				<input type="text" name="fechaPrestacion"  />
+
+				<label>Numero de cuotas (*)
+				<span class="small">El numero de cuotas</span>
+				</label>
+				<input type="text" name="salame"  />
+				
+				<label>Numero de autorizacion (*)
+				<span class="small">El numero autorizacion</span>
+				</label>
+				<input type="text" name="numeroAutorizacion"  />
+				
+				
+				<label>Recibo Nro (*)
+				<span class="small">El numero del recibo de sueldo</span>
+				</label>
+				<input type="text" name="reciboSueldoNro" value="{{ rsAfiliado.reciboSueldoNroMesActual }}" readonly="readonly" />
+				
+				<div class="spacer"></div>
+				
+			<input type="hidden" value="{{ rsAfiliado.key() }}" name="afiliadoHidden"/>
+			<input type="submit" value="Registrar" class="button-class" name="btnConfirmarRegistroAjax"/>
+		</form>
+	</div>
+{% else %}
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$("#btnAfiliadoServicio").click(function(){
+				window.location.replace('/servicioAfiliado?opcion=registrar&keyIdAfiliado={{ rsAfiliado.key() }}')
+			});
+		});
+	</script>
+	<h1>Debe vincular al afiliado con algun servicio en orden de acceder a esta opción.</h1>
+	<br>
+	<input type="submit" value="Registrar" style="width: 150px;" class="button-class" id="btnAfiliadoServicio"/>
+{% endif %}
+{% endblock %}

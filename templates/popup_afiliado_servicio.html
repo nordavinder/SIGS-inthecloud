@@ -1,0 +1,96 @@
+{% extends "_base_popup.html" %}
+{% block title %}
+	SIGS.:.Nuevo Usuario
+{% endblock %}
+{% block bodycontent %}
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$("select[name=selectServicio]").change(function(){
+					if($(this).val() == 'nuevoServicio'){
+						window.open('popup_servicio_registrar.html','_self', 'height=750, width=750');
+					}
+				});
+				
+				$('#formEntidadConvenio').submit(function(){
+					afiliadoHidden = $('input[name=afiliadoHidden]').val()  
+		            selectServicio = $('select[name=selectServicio]').val() 
+		            txtObservaciones = $('textarea[name=txtObservaciones]').val()   
+		            radioEstado = $('input[name=radioEstado]:checked').val()
+		            btnConfirmarRegistroAjax = $('input[name=btnConfirmarRegistroAjax]').val()
+		            dataString = 'afiliadoHidden='+afiliadoHidden+'&selectServicio='+selectServicio+   
+		            			  '&txtObservaciones='+txtObservaciones+'&radioEstado='+radioEstado+
+		            			  '&btnConfirmarRegistroAjax='+btnConfirmarRegistroAjax;
+					$.ajax({
+						type: "POST",
+						url:"/servicioAfiliado",
+						data:dataString,
+						dataType:"json",
+						success: function(responseData){
+							var newDiv = $('<div id="divServicios">');
+							$.each(responseData, function(index, itemData){
+								newDiv.append('-<a href="/servicios?opcion=detalles?keyId='+responseData[index].keyId+'">'+responseData[index].nombre+'</a><br>')
+								newDiv.append('&nbsp;&nbsp;&nbsp;&nbsp;Estado: '+responseData[index].estado+'<br>')
+							    if (responseData[index].observacion) 
+							 	   newDiv.append('&nbsp;&nbsp;&nbsp;&nbsp;Obs: '+ responseData[index].observacion+'<br>' )
+							    	
+							});
+							newDiv.append('</div>')
+							window.opener.jQuery('#divServicios').replaceWith(newDiv);
+							window.close();
+						}
+					});
+					return false;
+				});
+			});
+		</script>
+	{% if rsServicio %}
+		<div id="stylized" class="myform">		
+		<h1>Afiliado-Servicio</h1>
+		<p>Desde aca podes vincular un servicio a un afiliado</p>
+			<form  method="post" action="/servicioAfiliado" name='formRegistro' 
+												id="formEntidadConvenio">
+				
+				<label>Afiliado (*)
+				<span class="small">Este es el afiliado</span>
+				</label>
+				<input type="text" readonly="readonly" value="{{ rsAfiliado.usuario.primerNombre }} {{ rsAfiliado.usuario.primerApellido }}"/>
+				
+				<label>Servicio (*)
+				<span class="small">Elegi el servicio</span>
+				</label>
+				{% if rsServicio%}
+					<select name="selectServicio">
+						{% for servicio in rsServicio %}
+							<option value="{{ servicio.key() }}">{{ servicio.nombre }}</option>
+						{% endfor %}
+						<option value="nuevoServicio">Cargar nuevo servicio</option>
+					</select>
+				{% endif %}
+				<div class="spacer"></div>
+				<label>Observaciones (*)
+				<span class="small">Ingresa unas observaciones</span>
+				</label>
+				<textarea name="txtObservaciones" rows = "5" cols="36" ></textarea>
+				
+				<div class="spacer"></div>
+				
+				<fieldset>
+					<h1>Estado</h1>
+					<p>La relacion del afiliado respecto al servicio</p>
+					<label>Activo (*)
+					<span class="small">Activo</span>
+					</label>
+					<input type="radio"  name="radioEstado" value="ACTIVO"/>
+					<label>Suspendido (*)
+					<span class="small">Suspendido</span>
+					</label>
+					<input type="radio" name="radioEstado" value="SUSPENDIDO"/>
+				</fieldset>
+				<input type="hidden" value="{{ rsAfiliado.key() }}" name="afiliadoHidden"/>
+				<input type="submit" value="Registrar" class="button-class" name="btnConfirmarRegistroAjax"/>
+			</form>
+		</div>
+	{% else %}
+		<h1>El afiliado ya fue vinculado a todos los servicios o aun no fueron registrados servicios en el sistema.</h1> 
+	{% endif %}
+{% endblock %}

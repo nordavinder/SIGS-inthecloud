@@ -1,0 +1,57 @@
+{% extends "_base.html" %}
+{% block title %}
+	SIGS.:.Registrar Sindicato
+{% endblock %}
+{% block bodycontent %}
+<script type="text/javascript">
+$(document).ready(function(){
+	responseElementHidden = $('#responseStatusHidden')
+	if($(responseElementHidden).length && $(responseElementHidden).val()!='OK'){
+		noty({force: true, timeout: false, text: $(responseElementHidden).val(), type: 'alert'});
+	}
+	
+	$('form[name=formRegistro]').submit(function(){ 
+		var array = [
+					 validarCampoTexto($('input[name=nombre]'), 'Ingrese un nombre valido', 'string'),
+					 validarCampoTexto($('textarea[name=txtDescripcion]'), 'Ingrese una descripcion valida', 'string')
+		             ]
+
+		return (validateArray(array, 'error', 'Verifique los campos invalidos...', false, 'top'))
+	});
+})
+</script>
+	<h2>Registrar Sindicato</h2>
+	<form  method="post" action="/sindicato" name='formRegistro' 
+										enctype="multipart/form-data">
+		<br>
+		<fieldset>
+			<legend>Datos Generales</legend>
+			<table id="one-column-emphasis">
+				{% if nombre %}
+					<tr><td>Nombre:</td> <td><input type="text" name="nombre" value="{{ nombre }}"/></td></tr>
+				{% else %}
+					<tr><td>Nombre:</td> <td><input type="text" name="nombre" /></td></tr>
+				{% endif %}
+				{% if telefono %}
+					<tr><td>Telefono:</td> <td><input type="text" name="telefono" value="{{ telefono }}"/></td></tr>
+				{% else %}
+					<tr><td>Telefono:</td> <td><input type="text" name="telefono"/></td></tr>
+				{% endif %}
+				{% if descripcion %}
+					<tr><td>Descripcion:</td> <td> <textarea name="txtDescripcion" rows = "10" cols="50" >{{ descripcion }}</textarea></td></tr>
+				{% else %}
+					<tr><td>Descripcion:</td> <td> <textarea name="txtDescripcion" rows = "10" cols="50" ></textarea></td></tr>
+				{% endif %}
+				<tr><td>Imagen: </td> <td><input type="file" name="img"></td></tr>
+			</table>
+		</fieldset>
+		<br>
+		<input type="submit" value="Registrar" style="width: 200px;" class="button-class"/>
+		<input type="hidden" value="registrar" name="opcion">
+		<input type="submit" value="Cancelar" style="width: 200px;"
+			onclick="window.location='/'; return false;" class="button-class"/>
+	</form>
+	{% if responseStatus %}
+		<input type="hidden" value="{{responseStatus}}" id="responseStatusHidden">
+	{% endif %}
+{% endblock %}
